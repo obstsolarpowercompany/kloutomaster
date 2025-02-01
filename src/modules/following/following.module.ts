@@ -1,0 +1,13 @@
+import { Module } from '@nestjs/common';
+import { FollowingService } from './following.service';
+import { FollowingController } from './following.controller';
+import { Follower } from './entities/following.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserProfile } from '../user/entities/userProfile.entity';
+
+@Module({
+  imports: [TypeOrmModule.forFeature([Follower, UserProfile])],
+  controllers: [FollowingController],
+  providers: [FollowingService],
+})
+export class FollowingModule {}
