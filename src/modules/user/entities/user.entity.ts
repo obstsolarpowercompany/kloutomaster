@@ -3,6 +3,7 @@ import {
   BeforeInsert,
   BeforeUpdate,
   Column,
+  CreateDateColumn,
   DeleteDateColumn,
   Entity,
   JoinColumn,
@@ -10,22 +11,25 @@ import {
   ManyToMany,
   OneToMany,
   OneToOne,
-} from 'typeorm';
-import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { UserProfile } from './userProfile.entity';
-import { Follower } from '../../following/entities/following.entity';
-import { RefreshToken } from './refreshToken.entity';
-import { Wallet } from 'src/modules/wallet/entities/wallet.entity';
-import { BankAccount } from 'src/modules/bank-account/entities/bank-account.entity';
+  PrimaryGeneratedColumn,
+} from "typeorm";
+import { AbstractBaseEntity } from "../../../entities/base.entity";
+import { UserProfile } from "./userProfile.entity";
+import { Follower } from "../../following/entities/following.entity";
+import { RefreshToken } from "./refreshToken.entity";
+import { Wallet } from "../../wallet/entities/wallet.entity";
+// import { BankAccount } from 'src/modules/bank-account/entities/bank-account.entity';
 
 export enum UserType {
-  SUPER_ADMIN = 'super-admin',
-  ADMIN = 'admin',
-  USER = 'user',
+  SUPER_ADMIN = "super-admin",
+  ADMIN = "admin",
+  USER = "user",
 }
 
-@Entity({ name: 'users' })
+@Entity({ name: "users" })
 export class User extends AbstractBaseEntity {
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
   @Column({ unique: true, nullable: false })
   email: string;
 
@@ -56,8 +60,8 @@ export class User extends AbstractBaseEntity {
   @OneToOne(() => Wallet, (wallet) => wallet.user)
   wallet: Wallet;
 
-  @OneToMany(() => BankAccount, (bankAccount) => bankAccount.user)
-  bankAccounts: BankAccount[];
+  // @OneToMany(() => BankAccount, (bankAccount) => bankAccount.user)
+  // bankAccounts: BankAccount[];
 
   @OneToMany(() => Follower, (follower) => follower.follower)
   followers: Follower[];
@@ -65,9 +69,15 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => Follower, (follower) => follower.followee)
   following: Follower[];
 
-  @Column('text', { array: true, nullable: true })
+  @Column("text", { array: true, nullable: true })
   interests: string[];
 
   @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshTokens: RefreshToken[];
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @CreateDateColumn()
+  updated_at: Date;
 }

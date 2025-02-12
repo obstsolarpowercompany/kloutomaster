@@ -1,10 +1,11 @@
 import { AbstractBaseEntity } from "../../../entities/base.entity";
-import { Column, Entity, ManyToOne, JoinColumn } from "typeorm";
+import { Column, Entity, ManyToOne, JoinColumn, PrimaryGeneratedColumn, CreateDateColumn } from "typeorm";
 import { User } from "../../user/entities/user.entity"; // Assuming you have a User entity
 
 @Entity()
 export class OTP extends AbstractBaseEntity {
-  
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
   @Column()
   email: string;
 
@@ -20,4 +21,6 @@ export class OTP extends AbstractBaseEntity {
   @ManyToOne(() => User, { eager: true })
   @JoinColumn({ name: 'user_id' })
   user: User;
+  @CreateDateColumn()
+  created_at: Date;
 }

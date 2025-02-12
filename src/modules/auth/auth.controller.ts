@@ -27,7 +27,7 @@ import { CreateUserDTO } from './dto/create-user.dto';
 import { ConfirmOtpDto, ResendOTPDto } from './dto/confirm-otp.dto';
 import { LoginDto } from './dto/login.dto';
 import { CustomHttpException } from 'src/helpers/custom-http-filter';
-import { getRefreshToken } from 'src/helpers/auth';
+import { getRefreshToken } from '../../helpers/auth';
 
 @ApiTags('Authentication')
 @Controller('auth')

@@ -14,7 +14,7 @@ import {
 import {
   SuccessCreateUserResponse,
   ErrorCreateUserResponse,
-} from 'src/modules/user/dto/user-response.dto';
+} from '../../user/dto/user-response.dto';
 import {
   ConfirmEmailResponseDto,
   RefreshTokenResponseDto,
