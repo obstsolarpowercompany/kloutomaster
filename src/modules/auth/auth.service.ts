@@ -10,7 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import UserService from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDTO } from './dto/create-user.dto';
-import { CustomHttpException } from 'src/helpers/custom-http-filter';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 import * as SYS_MSG from '../../constant/SystemMessages';
 import crypto from 'crypto';
 import { generateAndSaveOtp, validateOtp } from '../../utils/otp-utils';

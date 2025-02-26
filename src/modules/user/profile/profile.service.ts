@@ -1,4 +1,4 @@
-import { CustomHttpException } from 'src/helpers/custom-http-filter';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import UserService from '../user.service';
 import * as SYS_MSG from '../../../constant/SystemMessages';
 import { HttpCode, HttpStatus, Injectable } from '@nestjs/common';

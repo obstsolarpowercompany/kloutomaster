@@ -1,7 +1,7 @@
 import { string } from 'joi';
 import { User } from '../../entities/user.entity';
 import { Wallet } from 'src/modules/wallet/entities/wallet.entity';
-import { BankAccount } from 'src/modules/bank-account/entities/bank-account.entity';
+// import { BankAccount } from 'src/modules/bank-account/entities/bank-account.entity';
 
 export const mockUser: User = {
   id: 'user1',
@@ -19,5 +19,5 @@ export const mockUser: User = {
   interests: [],
   refreshTokens: [],
   wallet: new Wallet(),
-  bankAccounts: [],
+  // bankAccounts: [],
 };

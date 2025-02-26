@@ -36,11 +36,11 @@ export class BankAccountGuard implements CanActivate {
       throw new ForbiddenException('Bank account not found.');
     }
 
-    if (bankAccount.user.id !== user.id) {
-      throw new ForbiddenException(
-        'You do not have access to this bank account.',
-      );
-    }
+    // if (bankAccount.user.id !== user.id) {
+    //   throw new ForbiddenException(
+    //     'You do not have access to this bank account.',
+    //   );
+    // }
 
     return true;
   }

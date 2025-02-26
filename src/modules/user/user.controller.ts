@@ -32,7 +32,7 @@ import { UpdateUserDocs, SoftDeleteUserDocs } from './docs/user-swagger.doc';
 import { UpdateUserDto } from './dto/update-user-dto';
 import { UserPayload } from './interfaces/user-payload.interface';
 import UserService from './user.service';
-import { skipAuth } from 'src/helpers/skipAuth';
+import { skipAuth } from '../../helpers/skipAuth';
 
 @ApiBearerAuth()
 @ApiTags('Users')

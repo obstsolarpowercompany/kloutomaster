@@ -26,7 +26,7 @@ import { pick } from 'src/helpers/pick';
 import { OTP } from './entities/otp.entity';
 import { MailingService } from '../mailing/mailing.service';
 import * as bcrypt from 'bcrypt';
-import { generateAndSaveOtp, validateOtp } from 'src/utils/otp-utils';
+import { generateAndSaveOtp, validateOtp } from '../../utils/otp-utils';
 import { UserProfile } from './entities/userProfile.entity';
 
 @Injectable()
