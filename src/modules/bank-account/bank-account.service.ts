@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { BankAccount } from './entities/bank-account.entity';
+import { BankAccount } from './domain/entities/bank-account.entity';
 
 @Injectable()
 export class BankAccountService {
   constructor(
     @InjectRepository(BankAccount)
     private readonly bankAccountRepository: Repository<BankAccount>,
-  ) {}
+  ) { }
 
   async getBankAccountById(bankAccountId: number): Promise<BankAccount> {
     const bankAccount = await this.bankAccountRepository.findOne({

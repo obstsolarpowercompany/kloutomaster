@@ -4,13 +4,15 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import { DataSource } from 'typeorm';
-import { AppModule } from './app.module';
-import { initializeDataSource } from './database/data-source';
-import { ResponseInterceptor } from './shared/inteceptors/response.interceptor';
+import { AppModule } from '../src/modules/main/main.module';
+import { initializeDataSource } from './scripts/data-source';
+import { ResponseInterceptor } from './modules/main/infrastructure/response.interceptor';
 import findAvailablePort from './helpers/find-port';
 import * as cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'express';
-import { MaintenanceInterceptor } from './interceptors/maintenance.interceptor';
+import { MaintenanceInterceptor } from './modules/main/infrastructure/maintenance.interceptor';
+
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
