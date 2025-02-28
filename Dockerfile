@@ -1,6 +1,7 @@
 FROM node:16.17.1-alpine AS builder
 WORKDIR /usr/src/build
 COPY package*.json ./
+COPY tsconfig.json ./
 RUN npm ci
 COPY . ./
 RUN npm run build
