@@ -1,10 +1,11 @@
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
+import * as path from 'path';
 
 dotenv.config();
 
-const isDevelopment = process.env.NODE_ENV === 'development';
 const sslOption = process.env.DB_SSL || false;
+const relativePath = path.join(path.relative('.', __dirname), '..');
 
 const dataSource = new DataSource({
   type: process.env.DB_TYPE as 'postgres',
@@ -14,12 +15,11 @@ const dataSource = new DataSource({
   port: +process.env.DB_PORT,
   database: process.env.DB_NAME,
   entities: [process.env.DB_ENTITIES],
-  migrations: [process.env.DB_MIGRATIONS],
-  synchronize: isDevelopment,
+  migrations: [`${relativePath}/../db/migrations/*.ts`],
+  synchronize: false,
   migrationsTableName: 'migrations',
   ssl: sslOption === 'require' ? { rejectUnauthorized: false } : sslOption === 'true',
 });
-console.log(dataSource.options)
 export async function initializeDataSource() {
   if (!dataSource.isInitialized) {
     await dataSource.initialize();

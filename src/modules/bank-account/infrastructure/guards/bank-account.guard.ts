@@ -5,7 +5,7 @@ import {
     ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { BankAccountService } from 'src/modules/bank-account/bank-account.service';
+import { BankAccountService } from '../../application/bank-account.service';
 
 @Injectable()
 export class BankAccountGuard implements CanActivate {

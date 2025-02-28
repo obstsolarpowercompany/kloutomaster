@@ -36,14 +36,14 @@ export class User extends AbstractBaseEntity {
   @Column({ unique: false, nullable: true })
   status: string;
 
-  // @Column({ nullable: true })
-  // phone: string;
-
   @Column({ nullable: true, default: true })
   is_active: boolean;
 
   @Column({ nullable: true, default: false })
   is_verified: boolean;
+
+  @Column({ nullable: false, default: false })
+  onboarded: boolean;
 
   @Column({ nullable: true, default: false })
   is_creator: boolean;
@@ -74,10 +74,4 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshTokens: RefreshToken[];
-
-  @CreateDateColumn()
-  created_at: Date;
-
-  @CreateDateColumn()
-  updated_at: Date;
 }

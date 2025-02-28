@@ -79,7 +79,7 @@ export class AuthGuard implements CanActivate {
             }
         }
 
-        console.log('No valid token found in Authorization header or cookies');
+        // console.log('No valid token found in Authorization header or cookies');
         return undefined;
     }
 

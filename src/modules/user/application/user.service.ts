@@ -283,7 +283,7 @@ export default class UserService {
 
     return await otpRepo.findOne({
       where: { email },
-      order: { created_at: 'DESC' },
+      order: { createdAt: 'DESC' },
     });
   }
 

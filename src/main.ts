@@ -3,15 +3,13 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
+import { Logger as Log4jsLogger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../src/modules/main/main.module';
 import { initializeDataSource } from './scripts/data-source';
 import { ResponseInterceptor } from './modules/main/infrastructure/response.interceptor';
 import findAvailablePort from './helpers/find-port';
 import * as cookieParser from 'cookie-parser';
-import { json, urlencoded } from 'express';
-import { MaintenanceInterceptor } from './modules/main/infrastructure/maintenance.interceptor';
-
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -25,21 +23,17 @@ async function bootstrap() {
 
   try {
     await initializeDataSource();
-    console.log('Data Source has been initialized!');
   } catch (err) {
     console.error('Error during Data Source initialization', err);
     process.exit(1);
   }
-
-  // const seedingService = app.get(SeedingService);
-  // await seedingService.seedDatabase();
 
   app.use(cookieParser());
   app.enable('trust proxy');
   app.useLogger(logger);
   app.enableCors();
   app.setGlobalPrefix('api/v1', {
-    exclude: ['/', 'health', 'api', 'api/v1', 'api/docs', 'probe'],
+    exclude: ['health', 'probe'],
   });
   app.useGlobalInterceptors(new ResponseInterceptor());
 
@@ -67,7 +61,9 @@ async function bootstrap() {
     url: `http://localhost:${port}/api/v1`,
   });
 }
-bootstrap().catch((err) => {
-  console.error('Error during bootstrap', err);
+
+void bootstrap().catch((err) => {
+  const logger = new Log4jsLogger();
+  logger.error('Error during app bootstrapping');
   process.exit(1);
 });

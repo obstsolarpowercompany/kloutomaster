@@ -21,6 +21,4 @@ export class OTP extends AbstractBaseEntity {
   @ManyToOne(() => User, { eager: true })
   @JoinColumn({ name: 'user_id' })
   user: User;
-  @CreateDateColumn()
-  created_at: Date;
 }

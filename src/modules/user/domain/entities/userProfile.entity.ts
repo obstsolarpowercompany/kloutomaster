@@ -8,10 +8,11 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
+import { AbstractBaseEntity } from '../../../shared/infrastructure/domain/base.entity';
 // import { Preferences } from './preferences.entity';
 
 @Entity()
-export class UserProfile {
+export class UserProfile extends AbstractBaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -55,6 +56,9 @@ export class UserProfile {
   @Column({ nullable: true, default: false })
   onboarded: boolean;
 
+  @Column({ nullable: false, default: false })
+  is_verified: boolean;
+
   // @OneToOne(() => Preferences, (preferences) => preferences.userProfile, { nullable: true })
   // @JoinColumn({ name: 'preferences' })
   // preferences: Preferences;
@@ -70,7 +74,4 @@ export class UserProfile {
 
   @Column({ type: 'int', default: 0 })
   number_of_following: number;
-
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  updated_at: Date;
 }

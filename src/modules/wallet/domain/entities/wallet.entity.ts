@@ -9,18 +9,13 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from '../../../user/domain/entities/user.entity';
+import { AbstractBaseEntity } from '../../../shared/infrastructure/domain/base.entity';
 // import { Transaction } from 'src/modules/transactions/entities/transaction.entity';
 
 @Entity({ name: 'wallets' })
-export class Wallet {
+export class Wallet extends AbstractBaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @CreateDateColumn()
-  created_at: Date;
-
-  @UpdateDateColumn()
-  updated_at: Date;
 
   @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
   balance: number;
