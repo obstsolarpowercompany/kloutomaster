@@ -11,7 +11,7 @@ export default registerAs('server', () => ({
 
     generalHost: process.env.SMTP_GENERAL_HOST,
     generalPort: process.env.SMTP_GENERAL_PORT,
-    generalSecure: process.env.SMTP_GENERAL_SECURE,
+    generalSecure: process.env.SMTP_GENERAL_HOST_SECURE,
     generalUser: process.env.SMTP_GENERAL_USER,
     generalPassword: process.env.SMTP_GENERAL_PASSWORD,
   },
