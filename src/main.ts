@@ -2,7 +2,6 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { Logger } from 'nestjs-pino';
 import { Logger as Log4jsLogger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../src/modules/main/main.module';
@@ -17,7 +16,6 @@ async function bootstrap() {
     rawBody: true,
   });
 
-  const logger = app.get(Logger);
 
   const dataSource = app.get(DataSource);
 
@@ -30,7 +28,7 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.enable('trust proxy');
-  app.useLogger(logger);
+  // app.useLogger(logger);
   app.enableCors();
   app.setGlobalPrefix('api/v1', {
     exclude: ['health', 'probe'],
@@ -50,15 +48,10 @@ async function bootstrap() {
   let port =
     app.get<ConfigService>(ConfigService).get<number>('server.port') || 3000;
 
-  // let port = configService.get<number>('PORT', 3000);
 
   port = await findAvailablePort(port);
-  await app.listen(port);
-
-  logger.log({
-    message: 'server started 🚀',
-    port,
-    url: `http://localhost:${port}/api/v1`,
+  await app.listen(port, () => {
+    Log4jsLogger.log(`Application listening on port ${port}`);
   });
 }
 

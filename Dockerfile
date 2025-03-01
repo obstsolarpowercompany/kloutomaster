@@ -26,6 +26,8 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 COPY tsconfig.json ./
 RUN npm ci --ignore-scripts && npm cache clean --force
+# Copy all files
+COPY . ./
 RUN npm run migration:run
 EXPOSE ${PORT}
 CMD ["npm", "run", "start:dev"]
