@@ -1,4 +1,3 @@
-// import * as bcrypt from 'bcryptjs';
 import {
   BeforeInsert,
   BeforeUpdate,

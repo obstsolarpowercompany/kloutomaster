@@ -25,7 +25,7 @@ import { CustomHttpException } from '../../main/infrastructure/custom-http-filte
 import { pick } from 'src/helpers/pick';
 import { OTP } from '../domain/entities/otp.entity';
 import { MailingService } from '../../mailing/application/mailing.service';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { generateAndSaveOtp, validateOtp } from '../../auth/application/otp-utils';
 import { UserProfile } from '../domain/entities/userProfile.entity';
 
