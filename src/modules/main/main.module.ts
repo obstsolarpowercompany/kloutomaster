@@ -18,6 +18,7 @@ import { FollowingModule } from '../following/following.module';
 import { PaymentModule } from '../payment/payment.module';
 import { MaintenanceInterceptor } from './infrastructure/maintenance.interceptor';
 import { configSchema } from '../../config/schemas/config.schema';
+import { WalletModule } from '@modules/wallet/wallet.module';
 
 
 @Module({
@@ -64,6 +65,7 @@ import { configSchema } from '../../config/schemas/config.schema';
     MailingModule,
     FollowingModule,
     PaymentModule,
+    WalletModule,
 
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, 'uploads'),

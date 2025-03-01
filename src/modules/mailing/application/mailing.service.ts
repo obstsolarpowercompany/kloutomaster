@@ -24,6 +24,9 @@ export class MailingService {
           user: this.configService.get<string>('server.smtp.generalUser'),
           pass: this.configService.get<string>('server.smtp.generalPassword'),
         },
+        tls: {
+          rejectUnauthorized: false,
+        }
       }),
     );
 
