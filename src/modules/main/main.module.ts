@@ -54,6 +54,7 @@ import { configSchema } from '../../config/schemas/config.schema';
     TypeOrmModule.forRootAsync({
       useFactory: async () => ({
         ...dataSource.options,
+        autoLoadEntities: true,
       }),
       dataSourceFactory: async () => dataSource,
     }),
