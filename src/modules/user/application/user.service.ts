@@ -82,12 +82,12 @@ export default class UserService {
         otpCode,
       );
 
+      setTimeout(() => {}, 1000);
+
       // After email is successfully sent, create the profile
       const newUserProfile = new UserProfile();
-      Object.assign(newUserProfile, {
-        email: savedUser.email,
-        user: savedUser,
-      });
+      newUserProfile.user = savedUser;
+      newUserProfile.email = savedUser.email;
       await manager.save(newUserProfile);
     } catch (error) {
       // Roll back user creation if email fails
