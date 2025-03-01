@@ -5,8 +5,9 @@ import { AuthGuard } from "@modules/auth/infrastructure/guards/auth.guard";
 import { Request } from "express";
 import { Wallet } from "@modules/wallet/domain/entities/wallet.entity";
 import { PageDTO } from "@modules/shared/infrastructure/dto/page.dto";
+import { ApiTags } from "@nestjs/swagger";
 
-
+@ApiTags('Wallet')
 @UseGuards(AuthGuard)
 @Controller('wallet')
 export class WalletController {
