@@ -13,7 +13,6 @@ export const mockUser: User = {
   status: 'active',
   user_type: 'user',
   profile: {} as UserProfile,
-  onboarded: false,
   followers: [],
   following: [],
   createdAt: new Date(),

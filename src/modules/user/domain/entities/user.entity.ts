@@ -41,9 +41,6 @@ export class User extends AbstractBaseEntity {
   @Column({ nullable: true, default: false })
   is_verified: boolean;
 
-  @Column({ nullable: false, default: false })
-  onboarded: boolean;
-
   @Column({ nullable: true, default: false })
   is_creator: boolean;
 
