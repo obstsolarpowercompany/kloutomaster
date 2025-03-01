@@ -28,6 +28,6 @@ COPY tsconfig.json ./
 RUN npm ci --ignore-scripts && npm cache clean --force
 # Copy all files
 COPY . ./
-RUN npm run migration:run
+RUN npm run typeorm -- -d ./src/scripts/data-source.ts migration:run --transaction each
 EXPOSE ${PORT}
 CMD ["npm", "run", "start:dev"]

@@ -3,12 +3,12 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger as Log4jsLogger } from '@nestjs/common';
-import { DataSource } from 'typeorm';
-import { AppModule } from '../src/modules/main/main.module';
+import { AppModule } from '@modules/main/main.module';
 import { initializeDataSource } from './scripts/data-source';
 import { ResponseInterceptor } from './modules/main/infrastructure/response.interceptor';
 import findAvailablePort from './helpers/find-port';
 import * as cookieParser from 'cookie-parser';
+
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -16,8 +16,6 @@ async function bootstrap() {
     rawBody: true,
   });
 
-
-  const dataSource = app.get(DataSource);
 
   try {
     await initializeDataSource();
@@ -28,7 +26,6 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.enable('trust proxy');
-  // app.useLogger(logger);
   app.enableCors();
   app.setGlobalPrefix('api/v1', {
     exclude: ['health', 'probe'],
