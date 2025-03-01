@@ -27,7 +27,7 @@ COPY package*.json ./
 COPY tsconfig.json ./
 RUN npm ci --ignore-scripts && npm cache clean --force
 COPY src/ ./src
-COPY --from=builder /usr/src/build/node_modules ./node_modules
-RUN npm run typeorm -- -d ./src/scripts/data-source.ts migration:run --transaction each
+ENV DB_TYPE=postgres
+RUN npm run typeorm -- -d ./src/scripts/data-source.ts migration:run --transaction each; exit 0
 EXPOSE ${PORT}
 CMD ["npm", "run", "start:dev"]
