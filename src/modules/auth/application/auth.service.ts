@@ -3,7 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import * as speakeasy from 'speakeasy';
 import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
