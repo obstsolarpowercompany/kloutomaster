@@ -11,6 +11,7 @@ ARG PORT=3000
 ARG NODE_ENV=production
 WORKDIR /usr/src/app
 COPY package*.json ./
+COPY tsconfig.json ./
 RUN npm ci --production --ignore-scripts && npm cache clean --force
 RUN npm run migration:run
 COPY --from=builder /usr/src/build/dist ./dist
@@ -23,6 +24,7 @@ FROM node:16.17.1-alpine AS runner-development
 ARG PORT=3000
 WORKDIR /usr/src/app
 COPY package*.json ./
+COPY tsconfig.json ./
 RUN npm ci --ignore-scripts && npm cache clean --force
 RUN npm run migration:run
 EXPOSE ${PORT}
