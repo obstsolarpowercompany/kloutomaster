@@ -54,8 +54,8 @@ export class MailingService {
 
       // Load the HTML template from the file system
       const templatePath = path.join(
-        __dirname,
-        'templates',
+        process.cwd(),
+        './src/modules/mailing/application/templates',
         `${template}.html`,
       );
       const templateSource = fs.readFileSync(templatePath, 'utf8');
