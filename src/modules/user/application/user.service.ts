@@ -2,6 +2,7 @@ import {
   BadRequestException,
   HttpStatus,
   Injectable,
+  Logger,
   NotFoundException,
   StreamableFile,
 } from '@nestjs/common';
@@ -39,7 +40,7 @@ export default class UserService {
     private mailingService: MailingService,
     private dataSource: DataSource,
   ) { }
-
+  private readonly logger = new Logger(UserService.name);
   // async createUser(createUserPayload: CreateNewUserOptions): Promise<any> {
   //   const newUser = new User();
   //   Object.assign(newUser, createUserPayload);
@@ -71,8 +72,10 @@ export default class UserService {
       newUser.email,
       newUser.id,
     );
+    this.logger.log('OTP generated and saved', savedOtp)
 
     const savedUser = await manager.save(newUser);
+    this.logger.log('User saved', savedUser)
 
     // Now save the UserProfile after ensuring the email is sent
     try {
@@ -81,18 +84,23 @@ export default class UserService {
         savedUser.email,
         otpCode,
       );
+      this.logger.log('Mail sent to '+ savedUser.email)
 
-      setTimeout(() => {}, 1000);
 
       // After email is successfully sent, create the profile
       const newUserProfile = new UserProfile();
       newUserProfile.user = savedUser;
       newUserProfile.email = savedUser.email;
+      this.logger.log('User profile assigned', newUserProfile)
       await manager.save(newUserProfile);
+      this.logger.log('User profile saved')
     } catch (error) {
       // Roll back user creation if email fails
+      this.logger.error('Rollback transaction started...')
       await manager.getRepository(User).delete(savedUser.id);
+      this.logger.error('Rollback user deletion')
       await manager.getRepository(OTP).delete(savedOtp.id);
+      this.logger.error('Rollback OTP deletion')
       throw new CustomHttpException(
         'Failed to send OTP email',
         HttpStatus.INTERNAL_SERVER_ERROR,
