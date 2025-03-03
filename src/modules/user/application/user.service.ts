@@ -91,12 +91,13 @@ export default class UserService {
       const newUserProfile = new UserProfile();
       newUserProfile.user = savedUser;
       newUserProfile.email = savedUser.email;
-      this.logger.log('User profile assigned', newUserProfile)
+      this.logger.log('User profile assigned', JSON.stringify(newUserProfile, null, 2))
       await manager.save(newUserProfile);
       this.logger.log('User profile saved')
     } catch (error) {
       // Roll back user creation if email fails
       this.logger.error('Rollback transaction started...')
+      console.log(error)
       await manager.getRepository(User).delete(savedUser.id);
       this.logger.error('Rollback user deletion')
       await manager.getRepository(OTP).delete(savedOtp.id);
