@@ -41,22 +41,26 @@ export default class UserService {
     private dataSource: DataSource,
   ) { }
   private readonly logger = new Logger(UserService.name);
-  // async createUser(createUserPayload: CreateNewUserOptions): Promise<any> {
-  //   const newUser = new User();
-  //   Object.assign(newUser, createUserPayload);
-  //   newUser.is_active = true;
-  //   return await this.userRepository.save(newUser);
-  // }
 
-  async findAllUsers() {
+  async findAllUsers(cursor: number, limit: number = 10) {
+    // Order priority in terms of verified users and number of primers and remove
+    // users not onboarded
     const users = await this.userRepository.find({
       relations: ['profile'],
-    });
+      where: { profile: { onboarded: true } },
+      order: {
+        profile: {
+          is_verified: 'DESC',
+          is_creator: 'DESC',
+          number_of_followers: 'DESC',
+          // TODO: In terms of users interests
+        },
+      },
+      take: limit,
+      skip: cursor,
+    });   
 
-    return {
-      message: 'Users fetched successfully',
-      data: users,
-    };
+    return users;
   }
 
   async createUser(

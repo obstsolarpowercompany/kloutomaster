@@ -22,11 +22,11 @@ export const RESOURCE_FOUND = (resource) => {
   return `${resource} found successfully`;
 };
 export const RESOURCE_FETCHED = (resource) => {
-  return `${resource} fetched successfully `;
+  return `${resource} fetched successfully`;
 };
 
 export const RESOURCE_ADDED = (resource) => {
-  return `${resource} added successfully `;
+  return `${resource} added successfully`;
 };
 
 export const RESOURCE_CREATED = (resource) => {

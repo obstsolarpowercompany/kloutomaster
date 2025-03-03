@@ -1,7 +1,7 @@
 import { Wallet } from "@modules/wallet/domain/entities/wallet.entity";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { IWalletRepository } from "@wallet/infrastructure/domain/wallet.repository";
+import { IWalletRepository } from "@modules/wallet/infrastructure/domain/contracts/wallet.repository";
 import { Repository } from "typeorm";
 
 @Injectable()

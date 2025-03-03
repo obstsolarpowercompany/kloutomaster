@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { AbstractBaseEntity } from '../../../shared/infrastructure/domain/base.entity';
+import { BankAccountEntity } from '@modules/bank-account/domain/entities/bank-account.entity';
 // import { Preferences } from './preferences.entity';
 
 @Entity()
@@ -59,10 +60,6 @@ export class UserProfile extends AbstractBaseEntity {
   @Column({ nullable: false, default: false })
   is_verified: boolean;
 
-  // @OneToOne(() => Preferences, (preferences) => preferences.userProfile, { nullable: true })
-  // @JoinColumn({ name: 'preferences' })
-  // preferences: Preferences;
-
   @Column({ type: 'int', default: 0 })
   number_of_posts: number;
 
@@ -74,4 +71,10 @@ export class UserProfile extends AbstractBaseEntity {
 
   @Column({ type: 'int', default: 0 })
   number_of_following: number;
+
+  @OneToOne(() => User, (user) => user.profile)
+  user_id: User;
+
+  @OneToOne(() => BankAccountEntity, (bankAccount) => bankAccount.userId)
+  public bankAccount: BankAccountEntity;
 }

@@ -2,7 +2,7 @@ import { IApplicationService } from "@modules/shared/application/service/base.se
 import { GetWalletByUserCommand } from "./use-cases/get-wallet-by-user.command";
 import { WALLET } from "./injection-tokens/tokens";
 import { Injectable, Inject, NotFoundException } from "@nestjs/common";
-import { IWalletRepository } from "@wallet/infrastructure/domain/wallet.repository";
+import { IWalletRepository } from "@modules/wallet/infrastructure/domain/contracts/wallet.repository";
 
 
 @Injectable()
