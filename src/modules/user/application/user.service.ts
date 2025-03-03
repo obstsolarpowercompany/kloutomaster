@@ -72,10 +72,8 @@ export default class UserService {
       newUser.email,
       newUser.id,
     );
-    this.logger.log('OTP generated and saved', savedOtp)
 
     const savedUser = await manager.save(newUser);
-    this.logger.log('User saved', savedUser)
 
     // Now save the UserProfile after ensuring the email is sent
     try {
@@ -84,8 +82,6 @@ export default class UserService {
         savedUser.email,
         otpCode,
       );
-      this.logger.log('Mail sent to '+ savedUser.email)
-
 
       // After email is successfully sent, create the profile
       const newUserProfile = new UserProfile();
@@ -93,15 +89,12 @@ export default class UserService {
       newUserProfile.email = savedUser.email;
       this.logger.log('User profile assigned', JSON.stringify(newUserProfile, null, 2))
       await manager.save(newUserProfile);
-      this.logger.log('User profile saved')
     } catch (error) {
       // Roll back user creation if email fails
       this.logger.error('Rollback transaction started...')
       console.log(error)
       await manager.getRepository(User).delete(savedUser.id);
-      this.logger.error('Rollback user deletion')
       await manager.getRepository(OTP).delete(savedOtp.id);
-      this.logger.error('Rollback OTP deletion')
       throw new CustomHttpException(
         'Failed to send OTP email',
         HttpStatus.INTERNAL_SERVER_ERROR,
