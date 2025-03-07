@@ -15,16 +15,36 @@
       "node"
     ],
     "paths": {
-      "@modules/*": ["src/modules/*"],
-      "@scripts/*": ["src/scripts/*"],
-      "@test/*": ["test/*"],
-      "@auth/*": ["src/modules/auth/*"],
-      "@bank-account/*": ["src/modules/bank-account/*"],
-      "@following/*": ["src/modules/following/*"],
-      "@mailing/*": ["src/modules/mailing/*"],
-      "@shared/*": ["src/modules/shared/*"],
-      "@user/*": ["src/modules/user/*"],
-      "@wallet/*": ["src/modules/wallet/*"]
+      "@modules/*": [
+        "src/modules/*"
+      ],
+      "@scripts/*": [
+        "src/scripts/*"
+      ],
+      "@test/*": [
+        "test/*"
+      ],
+      "@auth/*": [
+        "src/modules/auth/*"
+      ],
+      "@bank-account/*": [
+        "src/modules/bank-account/*"
+      ],
+      "@following/*": [
+        "src/modules/following/*"
+      ],
+      "@mailing/*": [
+        "src/modules/mailing/*"
+      ],
+      "@shared/*": [
+        "src/modules/shared/*"
+      ],
+      "@user/*": [
+        "src/modules/user/*"
+      ],
+      "@wallet/*": [
+        "src/modules/wallet/*"
+      ]
     },
     "incremental": true,
     "skipLibCheck": true,
@@ -33,5 +53,9 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false
-  }
+  },
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts"
+  ]
 }
