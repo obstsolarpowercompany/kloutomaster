@@ -6,11 +6,11 @@ import {
   OneToOne,
   JoinColumn,
   CreateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from './user.entity';
-import { AbstractBaseEntity } from '../../../shared/infrastructure/domain/base.entity';
+import { AbstractBaseEntity } from '@shared/infrastructure/domain/base.entity';
 import { BankAccountEntity } from '@modules/bank-account/domain/entities/bank-account.entity';
-// import { Preferences } from './preferences.entity';
 
 @Entity()
 export class UserProfile extends AbstractBaseEntity {
@@ -75,6 +75,6 @@ export class UserProfile extends AbstractBaseEntity {
   @OneToOne(() => User, (user) => user.profile)
   user_id: User;
 
-  @OneToOne(() => BankAccountEntity, (bankAccount) => bankAccount.userId)
-  public bankAccount: BankAccountEntity;
+  @OneToMany(() => BankAccountEntity, (bankAccount) => bankAccount.userId)
+  bankAccounts: BankAccountEntity[];
 }

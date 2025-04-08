@@ -19,6 +19,7 @@ import { PaymentModule } from '../payment/payment.module';
 import { MaintenanceInterceptor } from './infrastructure/maintenance.interceptor';
 import { configSchema } from '../../config/schemas/config.schema';
 import { WalletModule } from '@modules/wallet/wallet.module';
+import { BankAccountModule } from '@modules/bank-account/bank-account.module';
 
 
 @Module({
@@ -65,6 +66,7 @@ import { WalletModule } from '@modules/wallet/wallet.module';
     MailingModule,
     FollowingModule,
     PaymentModule,
+    BankAccountModule,
     WalletModule,
 
     ServeStaticModule.forRoot({
