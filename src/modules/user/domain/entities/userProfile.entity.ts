@@ -29,9 +29,12 @@ export class UserProfile extends AbstractBaseEntity {
   @Column({ nullable: true })
   username: string;
 
-  @ManyToOne(() => User, (user) => user.profile)
+  @OneToOne(() => User, (user) => user.profile)
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @Column({ nullable: false })
+  user_id: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   avatar_url: string;
@@ -71,9 +74,6 @@ export class UserProfile extends AbstractBaseEntity {
 
   @Column({ type: 'int', default: 0 })
   number_of_following: number;
-
-  @OneToOne(() => User, (user) => user.profile)
-  user_id: User;
 
   @OneToMany(() => BankAccountEntity, (bankAccount) => bankAccount.userId)
   bankAccounts: BankAccountEntity[];

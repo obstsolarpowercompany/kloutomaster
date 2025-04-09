@@ -44,7 +44,7 @@ export class User extends AbstractBaseEntity {
   @Column({ nullable: true, default: false })
   is_creator: boolean;
 
-  @OneToOne(() => UserProfile, (userProfile) => userProfile.user)
+  @OneToOne(() => UserProfile, (userProfile) => userProfile.user_id)
   profile: UserProfile;
 
   @DeleteDateColumn({ nullable: true })

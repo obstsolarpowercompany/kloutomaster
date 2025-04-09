@@ -5,30 +5,33 @@ import {
   Logger,
   NotFoundException,
   StreamableFile,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
 import {
   DataSource,
   EntityManager,
   FindOptionsWhere,
   Repository,
-} from 'typeorm';
+} from "typeorm";
 
-import * as SYS_MSG from '../../main/application/SystemMessages';
-import { User } from '../domain/entities/user.entity';
-import CreateNewUserOptions from '../domain/CreateNewUserOptions';
-import UpdateUserRecordOption from '../domain/UpdateUserRecordOption';
-import UserResponseDTO from '../infrastructure/dto/user-response.dto';
-import UserIdentifierOptionsType from '../domain/UserIdentifierOptions';
-import { UpdateUserDto } from '../infrastructure/dto/update-user-dto';
-import { UserPayload } from '../domain/entities/interfaces/user-payload.interface';
-import { CustomHttpException } from '../../main/infrastructure/custom-http-filter';
-import { pick } from 'src/helpers/pick';
-import { OTP } from '../domain/entities/otp.entity';
-import { MailingService } from '../../mailing/application/mailing.service';
-import * as bcrypt from 'bcryptjs';
-import { generateAndSaveOtp, validateOtp } from '../../auth/application/otp-utils';
-import { UserProfile } from '../domain/entities/userProfile.entity';
+import * as SYS_MSG from "../../main/application/SystemMessages";
+import { User } from "../domain/entities/user.entity";
+import CreateNewUserOptions from "../domain/CreateNewUserOptions";
+import UpdateUserRecordOption from "../domain/UpdateUserRecordOption";
+import UserResponseDTO from "../infrastructure/dto/user-response.dto";
+import UserIdentifierOptionsType from "../domain/UserIdentifierOptions";
+import { UpdateUserDto } from "../infrastructure/dto/update-user-dto";
+import { UserPayload } from "../domain/entities/interfaces/user-payload.interface";
+import { CustomHttpException } from "../../main/infrastructure/custom-http-filter";
+import { pick } from "src/helpers/pick";
+import { OTP } from "../domain/entities/otp.entity";
+import { MailingService } from "../../mailing/application/mailing.service";
+import * as bcrypt from "bcryptjs";
+import {
+  generateAndSaveOtp,
+  validateOtp,
+} from "../../auth/application/otp-utils";
+import { UserProfile } from "../domain/entities/userProfile.entity";
 
 @Injectable()
 export default class UserService {
@@ -38,34 +41,34 @@ export default class UserService {
     private userProfileRepo: Repository<UserProfile>,
     @InjectRepository(OTP) private otpRepository: Repository<OTP>,
     private mailingService: MailingService,
-    private dataSource: DataSource,
-  ) { }
+    private dataSource: DataSource
+  ) {}
   private readonly logger = new Logger(UserService.name);
 
   async findAllUsers(cursor: number, limit: number = 10) {
     // Order priority in terms of verified users and number of primers and remove
     // users not onboarded
     const users = await this.userRepository.find({
-      relations: ['profile'],
+      relations: ["profile"],
       where: { profile: { onboarded: true } },
       order: {
         profile: {
-          is_verified: 'DESC',
-          is_creator: 'DESC',
-          number_of_followers: 'DESC',
+          is_verified: "DESC",
+          is_creator: "DESC",
+          number_of_followers: "DESC",
           // TODO: In terms of users interests
         },
       },
       take: limit,
       skip: cursor,
-    });   
+    });
 
     return users;
   }
 
   async createUser(
     userData: CreateNewUserOptions,
-    manager: EntityManager,
+    manager: EntityManager
   ): Promise<User> {
     const newUser = new User();
     Object.assign(newUser, userData);
@@ -74,7 +77,7 @@ export default class UserService {
     const { savedOtp, otpCode } = await generateAndSaveOtp(
       manager.getRepository(OTP),
       newUser.email,
-      newUser.id,
+      newUser.id
     );
 
     const savedUser = await manager.save(newUser);
@@ -84,24 +87,27 @@ export default class UserService {
       await this.mailingService.sendSignupEmail(
         savedUser.email,
         savedUser.email,
-        otpCode,
+        otpCode
       );
 
       // After email is successfully sent, create the profile
       const newUserProfile = new UserProfile();
       newUserProfile.user = savedUser;
       newUserProfile.email = savedUser.email;
-      this.logger.log('User profile assigned', JSON.stringify(newUserProfile, null, 2))
+      this.logger.log(
+        "User profile assigned",
+        JSON.stringify(newUserProfile, null, 2)
+      );
       await manager.save(newUserProfile);
     } catch (error) {
       // Roll back user creation if email fails
-      this.logger.error('Rollback transaction started...')
-      console.log(error)
+      this.logger.error("Rollback transaction started...");
+      console.log(error);
       await manager.getRepository(User).delete(savedUser.id);
       await manager.getRepository(OTP).delete(savedOtp.id);
       throw new CustomHttpException(
-        'Failed to send OTP email',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to send OTP email",
+        HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
 
@@ -111,13 +117,13 @@ export default class UserService {
   async loginUserService(loginDto: Partial<User>, manager: EntityManager) {
     const user = await this.getUserRecord({
       identifier: loginDto.email,
-      identifierType: 'email',
+      identifierType: "email",
     });
 
     if (!user) {
       throw new CustomHttpException(
         SYS_MSG.USER_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.BAD_REQUEST
       );
     }
 
@@ -125,11 +131,12 @@ export default class UserService {
     const { savedOtp, otpCode } = await generateAndSaveOtp(
       manager.getRepository(OTP),
       user.email,
-      user.id,
+      user.id
     );
-
-    const userProfile = user.profile;
-
+    console.log(user);
+    const userProfile = await manager.getRepository(UserProfile).findOne({
+      where: { user_id: user.id },
+    });
     const first_name = userProfile?.first_name ?? user.email;
 
     // Send email after transaction completes
@@ -137,14 +144,14 @@ export default class UserService {
       await this.mailingService.sendLoginOtpEmail(
         user.email,
         first_name,
-        otpCode,
+        otpCode
       );
     } catch (error) {
       // Roll back user creation if email fails
       await manager.getRepository(OTP).delete(savedOtp.id);
       throw new CustomHttpException(
-        'Failed to send OTP email',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to send OTP email",
+        HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
 
@@ -197,11 +204,11 @@ export default class UserService {
     return await manager.findOne(User, { where: { email } });
   }
 
-  async updateUser(userId: string, updatedUserDto: UpdateUserDto, user) { }
+  async updateUser(userId: string, updatedUserDto: UpdateUserDto, user) {}
 
   async updateUserDetails(
     updateUserDto: UpdateUserDto,
-    manager?: EntityManager,
+    manager?: EntityManager
   ) {
     const userRepo = manager
       ? manager.getRepository(User)
@@ -211,7 +218,7 @@ export default class UserService {
       const user = await userRepo.findOne({ where: { id: updateUserDto.id } });
 
       if (!user) {
-        throw new NotFoundException('User not found');
+        throw new NotFoundException("User not found");
       }
 
       // Assign the updated properties to the existing user
@@ -221,8 +228,8 @@ export default class UserService {
       return await userRepo.save(user);
     } catch (error) {
       throw new BadRequestException({
-        error: 'Bad Request',
-        message: 'Failed to update user',
+        error: "Bad Request",
+        message: "Failed to update user",
         status_code: HttpStatus.BAD_REQUEST,
       });
     }
@@ -230,28 +237,28 @@ export default class UserService {
 
   async softDeleteUser(
     userId: string,
-    authenticatedUserId: string,
+    authenticatedUserId: string
   ): Promise<any> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
     });
 
     if (!user) {
-      throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND);
+      throw new CustomHttpException("User not found", HttpStatus.NOT_FOUND);
     }
 
     if (user.id !== authenticatedUserId) {
       throw new CustomHttpException(
-        'You are not authorized to delete this user',
-        HttpStatus.UNAUTHORIZED,
+        "You are not authorized to delete this user",
+        HttpStatus.UNAUTHORIZED
       );
     }
 
     await this.userRepository.softDelete(userId);
 
     return {
-      status: 'success',
-      message: 'Deletion in progress',
+      status: "success",
+      message: "Deletion in progress",
     };
   }
 
@@ -259,7 +266,7 @@ export default class UserService {
     const otpEntry = await this.otpRepository.findOne({ where: { email } });
 
     if (!otpEntry) {
-      throw new BadRequestException('No OTP found for this email.');
+      throw new BadRequestException("No OTP found for this email.");
     }
 
     if (otpEntry.otp_code !== otpCode) {
@@ -269,11 +276,11 @@ export default class UserService {
       if (otpEntry.attempts >= 3) {
         await this.otpRepository.delete({ email });
         throw new BadRequestException(
-          'OTP attempts exceeded. Please request a new OTP.',
+          "OTP attempts exceeded. Please request a new OTP."
         );
       }
 
-      throw new BadRequestException('Invalid OTP. Please try again.');
+      throw new BadRequestException("Invalid OTP. Please try again.");
     }
 
     // OTP is correct, delete OTP record and update user verification
@@ -283,19 +290,19 @@ export default class UserService {
 
   async getLastOtpByEmail(
     email: string,
-    manager?: EntityManager,
+    manager?: EntityManager
   ): Promise<OTP | undefined> {
     const otpRepo = manager ? manager.getRepository(OTP) : this.otpRepository;
 
     return await otpRepo.findOne({
       where: { email },
-      order: { createdAt: 'DESC' },
+      order: { createdAt: "DESC" },
     });
   }
 
   async deleteValidatedOtp(
     email: string,
-    manager?: EntityManager,
+    manager?: EntityManager
   ): Promise<void> {
     const otpRepo = manager ? manager.getRepository(OTP) : this.otpRepository;
 
@@ -311,31 +318,31 @@ export default class UserService {
   async verifyOtpForAction(
     email: string,
     otp: string,
-    manager: EntityManager,
+    manager: EntityManager
   ): Promise<User> {
     const user = await this.getUserRecord({
       identifier: email,
-      identifierType: 'email',
+      identifierType: "email",
     });
     if (!user) {
       throw new CustomHttpException(
         SYS_MSG.USER_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.BAD_REQUEST
       );
     }
 
     const isValidOtp = await validateOtp(email, otp, user.id, this, manager);
     if (!isValidOtp) {
       throw new CustomHttpException(
-        SYS_MSG.RESOURCE_INVALID('Otp'),
-        HttpStatus.BAD_REQUEST,
+        SYS_MSG.RESOURCE_INVALID("Otp"),
+        HttpStatus.BAD_REQUEST
       );
     }
 
     // Update user to mark them as verified or logged in, based on your requirement
     const updatedUser = await this.updateUserDetails(
       { id: user.id, is_verified: true },
-      manager,
+      manager
     );
 
     return updatedUser;
@@ -346,8 +353,8 @@ export default class UserService {
       await this.mailingService.sendSignupEmail(email, first_name, otpCode);
     } catch (error) {
       throw new CustomHttpException(
-        'Failed to send OTP email',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to send OTP email",
+        HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
   }
