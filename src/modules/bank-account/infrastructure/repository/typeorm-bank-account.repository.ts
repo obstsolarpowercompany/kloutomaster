@@ -60,6 +60,7 @@ export class TypeOrmBankAccountRepository implements IBankAccountRepository {
       account_holder_name: accountDetails.data['account_name'],
       account_number: command.accountNumber,
       bank_name: command.bankName,
+      bank_code: command.bankCode,
       user: {
         id: command.userId,
       },

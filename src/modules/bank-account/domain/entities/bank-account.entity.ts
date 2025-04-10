@@ -25,6 +25,9 @@ export class BankAccountEntity extends AbstractBaseEntity {
   @Column()
   public bank_name: string;
 
+  @Column({ nullable: true, type: 'text' })
+  public bank_code: string;
+
   @Column({ default: false })
   public is_verified: boolean;
 
