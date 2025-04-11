@@ -11,6 +11,7 @@ import { HttpModule } from "@nestjs/axios";
 import { PAYSTACK } from "@modules/payment/application/injection-tokens/tokens";
 import { GetBankAccountService } from "./application/use-cases/get-bank-account.service";
 import { DeleteBankAccountService } from "./application/use-cases/delete-bank-account.service";
+import { UpdateBankAccountService } from "./application/use-cases/update-bank-account.service";
 
 @Module({
     imports: [
@@ -25,6 +26,7 @@ import { DeleteBankAccountService } from "./application/use-cases/delete-bank-ac
         CreateBankAccountService,
         GetBankAccountService,
         DeleteBankAccountService,
+        UpdateBankAccountService,
         {
             useClass: PayStackService,
             provide: PAYSTACK
