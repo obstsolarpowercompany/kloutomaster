@@ -1,4 +1,13 @@
-# NAIJA PRIME CORE SERVICES API
+# Klouto core service API
+
+<p align="center">
+<a href="https://shields.io/community#backers" alt="Migrating...">
+    <img src="https://img.shields.io/badge/Migrating-to-klouto-blue" />
+</a>
+<a href="#e">
+    <img src="https://img.shields.io/badge/version-0.1.0-blue" />
+</a>
+</p>
 
 # Core Services
 
