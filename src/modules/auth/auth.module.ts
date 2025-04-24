@@ -19,7 +19,7 @@ import { Wallet } from '../wallet/domain/entities/wallet.entity';
   providers: [AuthenticationService, Repository, UserService, MailingService],
   imports: [
     TypeOrmModule.forFeature([User, OTP, RefreshToken, Wallet]),
-    PassportModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       global: true,
       secret: appConfig().jwtSecret,
@@ -29,5 +29,9 @@ import { Wallet } from '../wallet/domain/entities/wallet.entity';
       name: 'mailing',
     }),
   ],
+  exports: [
+    JwtModule,
+    PassportModule,
+  ]
 })
 export class AuthModule { }

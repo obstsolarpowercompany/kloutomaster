@@ -14,7 +14,7 @@ const dataSource = new DataSource({
   host: process.env.DB_HOST,
   port: +process.env.DB_PORT,
   database: process.env.DB_NAME,
-  entities: [process.env.DB_ENTITIES],
+  entities: [`${relativePath}/modules/**/*.entity{.ts,.js}`],
   migrations: [`${relativePath}/../db/migrations/*.ts`],
   synchronize: false,
   migrationsTableName: 'migrations',

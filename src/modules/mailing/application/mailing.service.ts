@@ -24,6 +24,9 @@ export class MailingService {
           user: this.configService.get<string>('server.smtp.generalUser'),
           pass: this.configService.get<string>('server.smtp.generalPassword'),
         },
+        tls: {
+          rejectUnauthorized: false,
+        }
       }),
     );
 
@@ -54,8 +57,8 @@ export class MailingService {
 
       // Load the HTML template from the file system
       const templatePath = path.join(
-        __dirname,
-        'templates',
+        process.cwd(),
+        './src/modules/mailing/application/templates',
         `${template}.html`,
       );
       const templateSource = fs.readFileSync(templatePath, 'utf8');

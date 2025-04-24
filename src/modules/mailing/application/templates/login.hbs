@@ -1,0 +1,80 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Your Login OTP</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      .container {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+      .header {
+        background-color: #2196f3;
+        color: #ffffff;
+        padding: 20px;
+        text-align: center;
+      }
+      .header h1 {
+        margin: 0;
+      }
+      .content {
+        padding: 20px;
+      }
+      .content h2 {
+        color: #333333;
+        font-size: 18px;
+      }
+      .otp-code {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2196f3;
+        padding: 10px;
+        border: 2px dashed #2196f3;
+        display: inline-block;
+        margin-top: 20px;
+        letter-spacing: 2px;
+      }
+      .footer {
+        background-color: #f4f4f4;
+        padding: 10px;
+        text-align: center;
+        font-size: 12px;
+        color: #777777;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Login OTP Code</h1>
+      </div>
+      <div class="content">
+        <h2>Dear {{first_name}}</h2>
+        <h2>Welcome back to Klouto, enter your OTP to continue.</h2>
+        <h2>Here is your one-time password (OTP) for secure login:</h2>
+        <div class="otp-code">{{otp}}</div>
+        <p>Please enter this code within the next 5 minutes to access your
+          account. If you didn’t request this, please ignore this email.</p>
+      </div>
+      <div class="footer">
+        <p>&copy; 2025 Klouto. All rights reserved.</p>
+        <p>Need help? Contact us at support@klouto.ng</p>
+        <small>
+          Not Spam? If you found this message in your spam or junk folder,
+          please mark it as “Not Spam” or “Move to Inbox” to ensure you continue
+          receiving important updates from us.
+        </small>
+      </div>
+    </div>
+  </body>
+</html>

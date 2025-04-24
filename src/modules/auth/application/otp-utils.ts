@@ -1,5 +1,5 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { OTP } from '../../user/domain/entities/otp.entity';
 import UserService from '../../user/application/user.service';
 import { EntityManager, Repository } from 'typeorm';

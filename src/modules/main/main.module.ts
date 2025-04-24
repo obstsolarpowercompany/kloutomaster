@@ -18,6 +18,8 @@ import { FollowingModule } from '../following/following.module';
 import { PaymentModule } from '../payment/payment.module';
 import { MaintenanceInterceptor } from './infrastructure/maintenance.interceptor';
 import { configSchema } from '../../config/schemas/config.schema';
+import { WalletModule } from '@modules/wallet/wallet.module';
+import { BankAccountModule } from '@modules/bank-account/bank-account.module';
 
 
 @Module({
@@ -54,6 +56,7 @@ import { configSchema } from '../../config/schemas/config.schema';
     TypeOrmModule.forRootAsync({
       useFactory: async () => ({
         ...dataSource.options,
+        autoLoadEntities: true,
       }),
       dataSourceFactory: async () => dataSource,
     }),
@@ -63,6 +66,8 @@ import { configSchema } from '../../config/schemas/config.schema';
     MailingModule,
     FollowingModule,
     PaymentModule,
+    BankAccountModule,
+    WalletModule,
 
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, 'uploads'),

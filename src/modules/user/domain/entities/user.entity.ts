@@ -1,4 +1,3 @@
-// import * as bcrypt from 'bcryptjs';
 import {
   BeforeInsert,
   BeforeUpdate,
@@ -18,7 +17,7 @@ import { UserProfile } from "./userProfile.entity";
 import { Follower } from "../../../following/domain/entities/following.entity";
 import { RefreshToken } from "./refreshToken.entity";
 import { Wallet } from "../../../wallet/domain/entities/wallet.entity";
-// import { BankAccount } from 'src/modules/bank-account/entities/bank-account.entity';
+import { BankAccountEntity } from "../../../bank-account/domain/entities/bank-account.entity";
 
 export enum UserType {
   SUPER_ADMIN = "super-admin",
@@ -42,9 +41,6 @@ export class User extends AbstractBaseEntity {
   @Column({ nullable: true, default: false })
   is_verified: boolean;
 
-  @Column({ nullable: false, default: false })
-  onboarded: boolean;
-
   @Column({ nullable: true, default: false })
   is_creator: boolean;
 
@@ -60,8 +56,8 @@ export class User extends AbstractBaseEntity {
   @OneToOne(() => Wallet, (wallet) => wallet.user)
   wallet: Wallet;
 
-  // @OneToMany(() => BankAccount, (bankAccount) => bankAccount.user)
-  // bankAccounts: BankAccount[];
+  @OneToMany(() => BankAccountEntity, (bankAccount) => bankAccount.userId)
+  bankAccounts: BankAccountEntity[];
 
   @OneToMany(() => Follower, (follower) => follower.follower)
   followers: Follower[];

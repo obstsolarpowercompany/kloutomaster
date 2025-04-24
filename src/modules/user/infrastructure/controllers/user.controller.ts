@@ -33,6 +33,7 @@ import { UpdateUserDto } from '../dto/update-user-dto';
 import { UserPayload } from '../../domain/entities/interfaces/user-payload.interface';
 import UserService from '../../application/user.service';
 import { skipAuth } from '../../../../helpers/skipAuth';
+import { UsersToDTO } from '../dto/user.mapper';
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -53,8 +54,12 @@ export class UserController {
   @skipAuth()
   @Get()
   @ApiOperation({ summary: 'Get all users' })
-  async findAllUsers() {
-    return this.userService.findAllUsers();
+  async findAllUsers(
+    @Query('cursor') cursor: number,
+    @Query('limit') limit: number = 10,
+  ): Promise<any> {
+    const users = await this.userService.findAllUsers(cursor, limit);
+    return UsersToDTO(users)
   }
 
   @Delete(':userId')

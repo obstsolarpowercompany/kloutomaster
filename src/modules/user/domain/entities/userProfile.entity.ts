@@ -6,10 +6,11 @@ import {
   OneToOne,
   JoinColumn,
   CreateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from './user.entity';
-import { AbstractBaseEntity } from '../../../shared/infrastructure/domain/base.entity';
-// import { Preferences } from './preferences.entity';
+import { AbstractBaseEntity } from '@shared/infrastructure/domain/base.entity';
+import { BankAccountEntity } from '@modules/bank-account/domain/entities/bank-account.entity';
 
 @Entity()
 export class UserProfile extends AbstractBaseEntity {
@@ -28,9 +29,12 @@ export class UserProfile extends AbstractBaseEntity {
   @Column({ nullable: true })
   username: string;
 
-  @ManyToOne(() => User, (user) => user.profile)
+  @OneToOne(() => User, (user) => user.profile)
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @Column({ nullable: false })
+  user_id: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   avatar_url: string;
@@ -59,10 +63,6 @@ export class UserProfile extends AbstractBaseEntity {
   @Column({ nullable: false, default: false })
   is_verified: boolean;
 
-  // @OneToOne(() => Preferences, (preferences) => preferences.userProfile, { nullable: true })
-  // @JoinColumn({ name: 'preferences' })
-  // preferences: Preferences;
-
   @Column({ type: 'int', default: 0 })
   number_of_posts: number;
 
@@ -74,4 +74,7 @@ export class UserProfile extends AbstractBaseEntity {
 
   @Column({ type: 'int', default: 0 })
   number_of_following: number;
+
+  @OneToMany(() => BankAccountEntity, (bankAccount) => bankAccount.userId)
+  bankAccounts: BankAccountEntity[];
 }

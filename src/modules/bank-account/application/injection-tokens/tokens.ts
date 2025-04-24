@@ -1,0 +1,1 @@
+export const BANK_ACCOUNT = Symbol('BANK_ACCOUNT');
