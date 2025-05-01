@@ -226,10 +226,10 @@ export class FollowingService {
     // Map results to return follower details
     const followerDetails = followers.map((follow) => ({
       id: follow.follower.id,
-      first_name: follow.follower.profile.first_name,
-      last_name: follow.follower.profile.last_name,
-      username: follow.follower.profile.username,
-      avatar_url: follow.follower.profile.avatar_url,
+      first_name: follow.follower.profile?.first_name,
+      last_name: follow.follower.profile?.last_name,
+      username: follow.follower.profile?.username,
+      avatar_url: follow.follower.profile?.avatar_url,
     }));
 
     return {
@@ -283,10 +283,10 @@ export class FollowingService {
     // Map results to return followee details
     const followeeDetails = following.map((follow) => ({
       id: follow.followee.id,
-      first_name: follow.followee.profile.first_name,
-      last_name: follow.followee.profile.last_name,
-      username: follow.followee.profile.username,
-      avatar_url: follow.followee.profile.avatar_url,
+      first_name: follow.followee.profile?.first_name,
+      last_name: follow.followee.profile?.last_name,
+      username: follow.followee.profile?.username,
+      avatar_url: follow.followee.profile?.avatar_url,
     }));
 
     return {
