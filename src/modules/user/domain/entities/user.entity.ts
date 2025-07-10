@@ -29,8 +29,14 @@ export enum UserType {
 export class User extends AbstractBaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
-  @Column({ unique: true, nullable: false })
+  @Column({ unique: true, nullable: true })
   email: string;
+
+  @Column({ unique: true, nullable: true })
+  phone: string;
+
+  @Column({ unique: true, nullable: true })
+  username: string;
 
   @Column({ unique: false, nullable: true })
   status: string;

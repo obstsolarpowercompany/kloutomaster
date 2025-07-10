@@ -1,18 +1,6 @@
-import {
-  BadRequestException,
-  HttpStatus,
-  Injectable,
-  Logger,
-  NotFoundException,
-  StreamableFile,
-} from "@nestjs/common";
+import { BadRequestException, HttpStatus, Injectable, Logger, NotFoundException, StreamableFile } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import {
-  DataSource,
-  EntityManager,
-  FindOptionsWhere,
-  Repository,
-} from "typeorm";
+import { DataSource, EntityManager, FindOptionsWhere, Repository } from "typeorm";
 
 import * as SYS_MSG from "../../main/application/SystemMessages";
 import { User } from "../domain/entities/user.entity";
@@ -27,11 +15,10 @@ import { pick } from "src/helpers/pick";
 import { OTP } from "../domain/entities/otp.entity";
 import { MailingService } from "../../mailing/application/mailing.service";
 import * as bcrypt from "bcryptjs";
-import {
-  generateAndSaveOtp,
-  validateOtp,
-} from "../../auth/application/otp-utils";
+import { generateAndSaveOtp, generateAndSavePhoneOtp, validateOtp } from "../../auth/application/otp-utils";
 import { UserProfile } from "../domain/entities/userProfile.entity";
+import { CreateUserWithPhoneDTO } from "@modules/auth/infrastructure/controllers/dto/phone-register-dto";
+import { WhatsAppService } from "@modules/whatsapp/whatsapp.service";
 
 @Injectable()
 export default class UserService {
@@ -41,7 +28,8 @@ export default class UserService {
     private userProfileRepo: Repository<UserProfile>,
     @InjectRepository(OTP) private otpRepository: Repository<OTP>,
     private mailingService: MailingService,
-    private dataSource: DataSource
+    private dataSource: DataSource,
+    private whatsAppService: WhatsAppService
   ) {}
   private readonly logger = new Logger(UserService.name);
 
@@ -66,38 +54,24 @@ export default class UserService {
     return users;
   }
 
-  async createUser(
-    userData: CreateNewUserOptions,
-    manager: EntityManager
-  ): Promise<User> {
+  async createUser(userData: CreateNewUserOptions, manager: EntityManager): Promise<User> {
     const newUser = new User();
     Object.assign(newUser, userData);
 
     // Start generating OTP and saving user/OTP within the transaction
-    const { savedOtp, otpCode } = await generateAndSaveOtp(
-      manager.getRepository(OTP),
-      newUser.email,
-      newUser.id
-    );
+    const { savedOtp, otpCode } = await generateAndSaveOtp(manager.getRepository(OTP), newUser.email, newUser.id);
 
     const savedUser = await manager.save(newUser);
 
     // Now save the UserProfile after ensuring the email is sent
     try {
-      await this.mailingService.sendSignupEmail(
-        savedUser.email,
-        savedUser.email,
-        otpCode
-      );
+      await this.mailingService.sendSignupEmail(savedUser.email, savedUser.email, otpCode);
 
       // After email is successfully sent, create the profile
       const newUserProfile = new UserProfile();
       newUserProfile.user = savedUser;
       newUserProfile.email = savedUser.email;
-      this.logger.log(
-        "User profile assigned",
-        JSON.stringify(newUserProfile, null, 2)
-      );
+      this.logger.log("User profile assigned", JSON.stringify(newUserProfile, null, 2));
       await manager.save(newUserProfile);
     } catch (error) {
       // Roll back user creation if email fails
@@ -105,10 +79,42 @@ export default class UserService {
       console.log(error);
       await manager.getRepository(User).delete(savedUser.id);
       await manager.getRepository(OTP).delete(savedOtp.id);
-      throw new CustomHttpException(
-        "Failed to send OTP email",
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new CustomHttpException("Failed to send OTP email", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    return savedUser;
+  }
+
+  async createUserWithPhone(userData: CreateUserWithPhoneDTO, manager: EntityManager): Promise<User> {
+    const newUser = new User();
+    Object.assign(newUser, userData);
+
+    // Generate and save phone OTP
+    const { savedOtp, otpCode } = await generateAndSavePhoneOtp(manager.getRepository(OTP), newUser.phone, newUser.id);
+
+    const savedUser = await manager.save(newUser);
+
+    // Send WhatsApp OTP
+    try {
+      const otpSent = await this.whatsAppService.sendOTP(newUser.phone, otpCode);
+
+      if (!otpSent) {
+        throw new Error("Failed to send WhatsApp OTP");
+      }
+      // Create the profile after OTP is sent
+      const newUserProfile = new UserProfile();
+      newUserProfile.user = savedUser;
+      newUserProfile.phone = savedUser.phone;
+
+      this.logger.log("User profile assigned for phone registration", JSON.stringify(newUserProfile, null, 2));
+
+      await manager.save(newUserProfile);
+    } catch (error) {
+      // Roll back user creation if WhatsApp OTP fails
+      this.logger.error("Rolling back phone registration...", error);
+      // await manager.getRepository(User).delete(savedUser.id);
+      await manager.getRepository(OTP).delete(savedOtp.id);
+      throw new CustomHttpException("Failed to send WhatsApp OTP", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     return savedUser;
@@ -121,18 +127,11 @@ export default class UserService {
     });
 
     if (!user) {
-      throw new CustomHttpException(
-        SYS_MSG.USER_NOT_FOUND,
-        HttpStatus.BAD_REQUEST
-      );
+      throw new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.BAD_REQUEST);
     }
 
     // Generate OTP and save user and OTP within the transaction
-    const { savedOtp, otpCode } = await generateAndSaveOtp(
-      manager.getRepository(OTP),
-      user.email,
-      user.id
-    );
+    const { savedOtp, otpCode } = await generateAndSaveOtp(manager.getRepository(OTP), user.email, user.id);
     console.log(user);
     const userProfile = await manager.getRepository(UserProfile).findOne({
       where: { user_id: user.id },
@@ -141,18 +140,11 @@ export default class UserService {
 
     // Send email after transaction completes
     try {
-      await this.mailingService.sendLoginOtpEmail(
-        user.email,
-        first_name,
-        otpCode
-      );
+      await this.mailingService.sendLoginOtpEmail(user.email, first_name, otpCode);
     } catch (error) {
       // Roll back user creation if email fails
       await manager.getRepository(OTP).delete(savedOtp.id);
-      throw new CustomHttpException(
-        "Failed to send OTP email",
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new CustomHttpException("Failed to send OTP email", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     return user;
@@ -204,15 +196,14 @@ export default class UserService {
     return await manager.findOne(User, { where: { email } });
   }
 
+  async getUserByPhoneTrans(phone: string, manager: EntityManager) {
+    return await manager.findOne(User, { where: { phone } });
+  }
+
   async updateUser(userId: string, updatedUserDto: UpdateUserDto, user) {}
 
-  async updateUserDetails(
-    updateUserDto: UpdateUserDto,
-    manager?: EntityManager
-  ) {
-    const userRepo = manager
-      ? manager.getRepository(User)
-      : this.userRepository;
+  async updateUserDetails(updateUserDto: UpdateUserDto, manager?: EntityManager) {
+    const userRepo = manager ? manager.getRepository(User) : this.userRepository;
 
     try {
       const user = await userRepo.findOne({ where: { id: updateUserDto.id } });
@@ -235,10 +226,7 @@ export default class UserService {
     }
   }
 
-  async softDeleteUser(
-    userId: string,
-    authenticatedUserId: string
-  ): Promise<any> {
+  async softDeleteUser(userId: string, authenticatedUserId: string): Promise<any> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
     });
@@ -248,10 +236,7 @@ export default class UserService {
     }
 
     if (user.id !== authenticatedUserId) {
-      throw new CustomHttpException(
-        "You are not authorized to delete this user",
-        HttpStatus.UNAUTHORIZED
-      );
+      throw new CustomHttpException("You are not authorized to delete this user", HttpStatus.UNAUTHORIZED);
     }
 
     await this.userRepository.softDelete(userId);
@@ -275,9 +260,7 @@ export default class UserService {
 
       if (otpEntry.attempts >= 3) {
         await this.otpRepository.delete({ email });
-        throw new BadRequestException(
-          "OTP attempts exceeded. Please request a new OTP."
-        );
+        throw new BadRequestException("OTP attempts exceeded. Please request a new OTP.");
       }
 
       throw new BadRequestException("Invalid OTP. Please try again.");
@@ -288,10 +271,7 @@ export default class UserService {
     await this.userRepository.update({ email }, { is_verified: true });
   }
 
-  async getLastOtpByEmail(
-    email: string,
-    manager?: EntityManager
-  ): Promise<OTP | undefined> {
+  async getLastOtpByEmail(email: string, manager?: EntityManager): Promise<OTP | undefined> {
     const otpRepo = manager ? manager.getRepository(OTP) : this.otpRepository;
 
     return await otpRepo.findOne({
@@ -300,10 +280,7 @@ export default class UserService {
     });
   }
 
-  async deleteValidatedOtp(
-    email: string,
-    manager?: EntityManager
-  ): Promise<void> {
+  async deleteValidatedOtp(email: string, manager?: EntityManager): Promise<void> {
     const otpRepo = manager ? manager.getRepository(OTP) : this.otpRepository;
 
     await otpRepo.delete({ email });
@@ -315,35 +292,22 @@ export default class UserService {
     await otpRepo.delete({ email });
   }
 
-  async verifyOtpForAction(
-    email: string,
-    otp: string,
-    manager: EntityManager
-  ): Promise<User> {
+  async verifyOtpForAction(email: string, otp: string, manager: EntityManager): Promise<User> {
     const user = await this.getUserRecord({
       identifier: email,
       identifierType: "email",
     });
     if (!user) {
-      throw new CustomHttpException(
-        SYS_MSG.USER_NOT_FOUND,
-        HttpStatus.BAD_REQUEST
-      );
+      throw new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.BAD_REQUEST);
     }
 
     const isValidOtp = await validateOtp(email, otp, user.id, this, manager);
     if (!isValidOtp) {
-      throw new CustomHttpException(
-        SYS_MSG.RESOURCE_INVALID("Otp"),
-        HttpStatus.BAD_REQUEST
-      );
+      throw new CustomHttpException(SYS_MSG.RESOURCE_INVALID("Otp"), HttpStatus.BAD_REQUEST);
     }
 
     // Update user to mark them as verified or logged in, based on your requirement
-    const updatedUser = await this.updateUserDetails(
-      { id: user.id, is_verified: true },
-      manager
-    );
+    const updatedUser = await this.updateUserDetails({ id: user.id, is_verified: true }, manager);
 
     return updatedUser;
   }
@@ -352,10 +316,7 @@ export default class UserService {
     try {
       await this.mailingService.sendSignupEmail(email, first_name, otpCode);
     } catch (error) {
-      throw new CustomHttpException(
-        "Failed to send OTP email",
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new CustomHttpException("Failed to send OTP email", HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

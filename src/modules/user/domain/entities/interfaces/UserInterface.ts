@@ -5,6 +5,10 @@ interface UserInterface {
 
   email: string;
 
+  username: string;
+
+  phone: string;
+
   secret: string;
 
   profile: UserProfile;
@@ -20,7 +24,6 @@ interface UserInterface {
   created_at: Date;
 
   updated_at: Date;
-
 }
 
 export default UserInterface;
