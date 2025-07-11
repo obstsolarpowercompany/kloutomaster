@@ -34,6 +34,10 @@ export class VerifyPhoneOTPDTO {
 }
 
 export class ResendPhoneOTPDTO {
+  @ApiProperty({
+    description: "The phone number of the user",
+    example: "234567890123",
+  })
   @IsString()
   @IsNotEmpty()
   phone: string;

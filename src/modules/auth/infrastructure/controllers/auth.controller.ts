@@ -11,12 +11,13 @@ import {
   RegisterByPhone,
   ConfirmEmailDocs,
   ConfirmPhoneDocs,
+  ResendPhoneOTPDocs,
 } from "../docs/auth-swagger.doc";
 import { CreateUserDTO } from "./dto/create-user.dto";
 import { ConfirmOtpDto, ResendOTPDto } from "./dto/confirm-otp.dto";
 import { LoginDto } from "./dto/login.dto";
 import { getRefreshToken } from "../domain/auth";
-import { CreateUserWithPhoneDTO, VerifyPhoneOTPDTO } from "./dto/phone-register-dto";
+import { CreateUserWithPhoneDTO, ResendPhoneOTPDTO, VerifyPhoneOTPDTO } from "./dto/phone-register-dto";
 
 @ApiTags("Authentication")
 @Controller("auth")
@@ -77,6 +78,14 @@ export default class RegistrationController {
   @HttpCode(200)
   async resendOtp(@Body() resendOTPDto: ResendOTPDto, @Res({ passthrough: true }) res: Response) {
     return this.authService.resendOtp(resendOTPDto, res);
+  }
+
+  @skipAuth()
+  @ResendPhoneOTPDocs()
+  @Post("resend-otp-phone")
+  @HttpCode(200)
+  async resendPhoneOtp(@Body() resendOTPDto: ResendPhoneOTPDTO, @Res({ passthrough: true }) res: Response) {
+    return this.authService.resendPhoneOtp(resendOTPDto, res);
   }
 
   @skipAuth()

@@ -14,7 +14,7 @@ import {
 import { SuccessCreateUserResponse, ErrorCreateUserResponse } from "../../../user/infrastructure/dto/user-response.dto";
 import { ConfirmEmailResponseDto, RefreshTokenResponseDto } from "../controllers/dto/auth-response.dto";
 import { ConfirmEmailDTO, CreateUserDTO } from "../controllers/dto/create-user.dto";
-import { CreateUserWithPhoneDTO, VerifyPhoneOTPDTO } from "../controllers/dto/phone-register-dto";
+import { CreateUserWithPhoneDTO, ResendPhoneOTPDTO, VerifyPhoneOTPDTO } from "../controllers/dto/phone-register-dto";
 
 export function LoginUserDocs() {
   return applyDecorators(
@@ -113,6 +113,28 @@ export function ResendOTPDocs() {
     ApiTags("Authentication"),
     ApiOperation({ summary: "Confirm Email with OTP" }),
     ApiBody({ type: ConfirmEmailDTO }),
+    ApiResponse({
+      status: 200,
+      description: "Email verified successfully",
+      type: ConfirmEmailResponseDto,
+    }),
+    ApiBadRequestResponse({
+      status: 400,
+      description: "Invalid id",
+      type: ErrorCreateUserResponse,
+    }),
+    ApiNotFoundResponse({
+      status: 404,
+      description: "Not Found Error",
+      type: ErrorCreateUserResponse,
+    })
+  );
+}
+export function ResendPhoneOTPDocs() {
+  return applyDecorators(
+    ApiTags("Authentication"),
+    ApiOperation({ summary: "Resend phone OTP (whatsapp)" }),
+    ApiBody({ type: ResendPhoneOTPDTO }),
     ApiResponse({
       status: 200,
       description: "Email verified successfully",

@@ -118,7 +118,7 @@ export default class UserService {
     } catch (error) {
       // Roll back user creation if WhatsApp OTP fails
       this.logger.error("Rolling back phone registration...", error);
-      // await manager.getRepository(User).delete(savedUser.id);
+      await manager.getRepository(User).delete(savedUser.id);
       await manager.getRepository(OTP).delete(savedOtp.id);
       throw new CustomHttpException("Failed to send WhatsApp OTP", HttpStatus.INTERNAL_SERVER_ERROR);
     }

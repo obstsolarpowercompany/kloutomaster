@@ -19,7 +19,8 @@ import { RefreshToken } from "../../user/domain/entities/refreshToken.entity";
 import { generateAccountNumber } from "../../wallet/application/wallet.helper";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Wallet } from "../../wallet/domain/entities/wallet.entity";
-import { CreateUserWithPhoneDTO, VerifyPhoneOTPDTO } from "../infrastructure/controllers/dto/phone-register-dto";
+import { CreateUserWithPhoneDTO, ResendPhoneOTPDTO, VerifyPhoneOTPDTO } from "../infrastructure/controllers/dto/phone-register-dto";
+import { WhatsAppService } from "@modules/whatsapp/whatsapp.service";
 
 @Injectable()
 export default class AuthenticationService {
@@ -28,6 +29,7 @@ export default class AuthenticationService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private dataSource: DataSource,
+    private whatsAppService: WhatsAppService,
     private readonly entityManager: EntityManager,
     @InjectRepository(Wallet) private walletRepo: Repository<Wallet>
   ) {}
@@ -282,6 +284,45 @@ export default class AuthenticationService {
       // Return a success message
       return {
         message: "OTP has been resent to your mail",
+      };
+    });
+  }
+  async resendPhoneOtp(resendOTPDto: ResendPhoneOTPDTO, res: any) {
+    return await this.entityManager.transaction(async (manager) => {
+      const phone = this.whatsAppService.formatPhoneNumber(resendOTPDto.phone);
+
+      const user = await this.userService.getUserByPhoneTrans(phone, this.entityManager);
+
+      if (!user) {
+        throw new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+      }
+
+      // Find the last OTP entry for the user
+      const lastOtp = await this.userService.getLastOtpOfUser(phone, this.entityManager, "number");
+
+      // If there's an existing OTP, delete it
+      if (lastOtp) {
+        await this.userService.deleteValidatedOtp(phone, this.entityManager, "number");
+      }
+
+      const { savedOtp, otpCode } = await generateAndSaveOtp(manager.getRepository(OTP), user.email, user.id, "phone");
+
+      // Send OTP (e.g., via email or SMS)
+      try {
+        const otpSent = await this.whatsAppService.sendOTP(phone, otpCode);
+
+        if (!otpSent) {
+          throw new Error("Failed to send WhatsApp OTP");
+        }
+      } catch (error) {
+        // Rollback user creation and OTP if email sending fails
+        await manager.getRepository(OTP).delete(savedOtp.id);
+        throw new CustomHttpException("Failed to send OTP mobile", HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+
+      // Return a success message
+      return {
+        message: "OTP has been resent to your whatsapp",
       };
     });
   }
