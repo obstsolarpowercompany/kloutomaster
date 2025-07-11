@@ -89,8 +89,14 @@ export default class UserService {
     const newUser = new User();
     Object.assign(newUser, userData);
 
+    const formattedNumber = this.whatsAppService.formatPhoneNumber(newUser.phone);
+    newUser.phone = formattedNumber;
+
+    if (formattedNumber.length != 14) {
+      throw new CustomHttpException(SYS_MSG.RESOURCE_INVALID("Phone Number"), HttpStatus.BAD_REQUEST);
+    }
     // Generate and save phone OTP
-    const { savedOtp, otpCode } = await generateAndSavePhoneOtp(manager.getRepository(OTP), newUser.phone, newUser.id);
+    const { savedOtp, otpCode } = await generateAndSavePhoneOtp(manager.getRepository(OTP), formattedNumber, newUser.id);
 
     const savedUser = await manager.save(newUser);
 
@@ -104,7 +110,7 @@ export default class UserService {
       // Create the profile after OTP is sent
       const newUserProfile = new UserProfile();
       newUserProfile.user = savedUser;
-      newUserProfile.phone = savedUser.phone;
+      newUserProfile.phone = formattedNumber;
 
       this.logger.log("User profile assigned for phone registration", JSON.stringify(newUserProfile, null, 2));
 
@@ -271,19 +277,29 @@ export default class UserService {
     await this.userRepository.update({ email }, { is_verified: true });
   }
 
-  async getLastOtpByEmail(email: string, manager?: EntityManager): Promise<OTP | undefined> {
+  async getLastOtpOfUser(identifier: string, manager?: EntityManager, method: "email" | "number" = "email"): Promise<OTP | undefined> {
     const otpRepo = manager ? manager.getRepository(OTP) : this.otpRepository;
-
+    if (method === "number") {
+      return await otpRepo.findOne({
+        where: { phone: identifier },
+        order: { createdAt: "DESC" },
+      });
+    }
     return await otpRepo.findOne({
-      where: { email },
+      where: { email: identifier },
       order: { createdAt: "DESC" },
     });
   }
 
-  async deleteValidatedOtp(email: string, manager?: EntityManager): Promise<void> {
+  async deleteValidatedOtp(identifier: string, manager?: EntityManager, method: "email" | "number" = "email"): Promise<void> {
     const otpRepo = manager ? manager.getRepository(OTP) : this.otpRepository;
 
-    await otpRepo.delete({ email });
+    if (method === "number") {
+      await otpRepo.delete({ phone: identifier });
+      return;
+    }
+    await otpRepo.delete({ email: identifier });
+    return;
   }
 
   async deleteValidated(email: string, manager?: EntityManager): Promise<void> {
@@ -307,6 +323,28 @@ export default class UserService {
     }
 
     // Update user to mark them as verified or logged in, based on your requirement
+    const updatedUser = await this.updateUserDetails({ id: user.id, is_verified: true }, manager);
+
+    return updatedUser;
+  }
+
+  async verifyOtpPhoneForAction(phone: string, otp: string, manager: EntityManager): Promise<User> {
+    const formattedNumber = this.whatsAppService.formatPhoneNumber(phone);
+
+    if (formattedNumber.length != 14) {
+      throw new CustomHttpException(SYS_MSG.RESOURCE_INVALID("Phone Number"), HttpStatus.BAD_REQUEST);
+    }
+
+    const user = await this.getUserByPhoneTrans(formattedNumber, manager);
+    if (!user) {
+      throw new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.BAD_REQUEST);
+    }
+
+    const isValidOtp = await validateOtp(formattedNumber, otp, user.id, this, manager, "number");
+    if (!isValidOtp) {
+      throw new CustomHttpException(SYS_MSG.RESOURCE_INVALID("Otp"), HttpStatus.BAD_REQUEST);
+    }
+
     const updatedUser = await this.updateUserDetails({ id: user.id, is_verified: true }, manager);
 
     return updatedUser;

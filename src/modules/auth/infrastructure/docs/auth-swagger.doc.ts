@@ -14,7 +14,7 @@ import {
 import { SuccessCreateUserResponse, ErrorCreateUserResponse } from "../../../user/infrastructure/dto/user-response.dto";
 import { ConfirmEmailResponseDto, RefreshTokenResponseDto } from "../controllers/dto/auth-response.dto";
 import { ConfirmEmailDTO, CreateUserDTO } from "../controllers/dto/create-user.dto";
-import { CreateUserWithPhoneDTO } from "../controllers/dto/phone-register-dto";
+import { CreateUserWithPhoneDTO, VerifyPhoneOTPDTO } from "../controllers/dto/phone-register-dto";
 
 export function LoginUserDocs() {
   return applyDecorators(
@@ -47,7 +47,7 @@ export function RegisterUserDocs() {
 export function RegisterByPhone() {
   return applyDecorators(
     ApiTags("Authentication"),
-    ApiOperation({ summary: "User Registration" }),
+    ApiOperation({ summary: "User Registration by phone" }),
     ApiBody({ type: CreateUserWithPhoneDTO }),
     ApiResponse({
       status: 201,
@@ -62,11 +62,34 @@ export function RegisterByPhone() {
   );
 }
 
-export function ConirmEmailDocs() {
+export function ConfirmEmailDocs() {
   return applyDecorators(
     ApiTags("Authentication"),
     ApiOperation({ summary: "Confirm Email with OTP" }),
     ApiBody({ type: ConfirmEmailDTO }),
+    ApiResponse({
+      status: 200,
+      description: "Email verified successfully",
+      type: ConfirmEmailResponseDto,
+    }),
+    ApiBadRequestResponse({
+      status: 400,
+      description: "Invalid id",
+      type: ErrorCreateUserResponse,
+    }),
+    ApiNotFoundResponse({
+      status: 404,
+      description: "Not Found Error",
+      type: ErrorCreateUserResponse,
+    })
+  );
+}
+
+export function ConfirmPhoneDocs() {
+  return applyDecorators(
+    ApiTags("Authentication"),
+    ApiOperation({ summary: "Confirm Phone by OTP" }),
+    ApiBody({ type: VerifyPhoneOTPDTO }),
     ApiResponse({
       status: 200,
       description: "Email verified successfully",

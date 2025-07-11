@@ -48,14 +48,21 @@ export async function generateAndSavePhoneOtp(
 
 // Helper function to validate OTP
 
-export async function validateOtp(email: string, otp: string, userId: string, userService: UserService, manager?: EntityManager): Promise<boolean> {
+export async function validateOtp(
+  identifier: string,
+  otp: string,
+  userId: string,
+  userService: UserService,
+  manager?: EntityManager,
+  platform: "email" | "number" = "email"
+): Promise<boolean> {
   try {
     // Get the OTP record within the transaction if a manager is provided
-    const storedOtp = await userService.getLastOtpByEmail(email, manager);
+    const storedOtp = await userService.getLastOtpOfUser(identifier, manager, platform);
 
     // If OTP is not found, return a BadRequestException
     if (!storedOtp) {
-      throw new BadRequestException("OTP not found for the email");
+      throw new BadRequestException(`OTP not found for the ${platform}`);
     }
 
     // Check if OTP has expired
@@ -71,7 +78,7 @@ export async function validateOtp(email: string, otp: string, userId: string, us
     }
 
     // OTP is valid, delete the OTP after use within the transaction if provided
-    await userService.deleteValidatedOtp(email, manager);
+    await userService.deleteValidatedOtp(identifier, manager, platform);
     return true;
   } catch (error) {
     console.error("Error validating OTP:", error);

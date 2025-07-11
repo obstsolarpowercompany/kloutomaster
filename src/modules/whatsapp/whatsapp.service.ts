@@ -15,11 +15,7 @@ export class WhatsAppService {
     try {
       // Format phone number (ensure it starts with + and country code)
       const formattedPhone = this.formatPhoneNumber(phoneNumber);
-
-      console.log("This is the formatted phone number:", formattedPhone);
-      console.log("This is the OTP code:", otpCode);
-      console.log("This is the WhatsApp number:", this.configService.get("TWILIO_WHATSAPP_NUMBER"));
-
+      console.log("this is the formatted phone number:", formattedPhone);
       const message = await this.client.messages.create({
         body: `Your verification code is: ${otpCode}. This code will expire in 5 minutes.`,
         from: this.configService.get("TWILIO_WHATSAPP_NUMBER"),
@@ -34,13 +30,17 @@ export class WhatsAppService {
     }
   }
 
-  private formatPhoneNumber(phoneNumber: string): string {
-    // Remove all non-digit characters
+  public formatPhoneNumber(phoneNumber: string): string {
     let cleaned = phoneNumber.replace(/\D/g, "");
 
-    if (!cleaned.startsWith("234") && (cleaned.length === 10 || cleaned.length === 11)) {
-      // For Nigerian numbers, add 234 country code
-      cleaned = "234" + cleaned;
+    if (cleaned.startsWith("2340")) {
+      cleaned = "234" + cleaned.slice(4);
+    } else if (cleaned.startsWith("0")) {
+      cleaned = "234" + cleaned.slice(1);
+    } else if (!cleaned.startsWith("234")) {
+      if (cleaned.length === 10) {
+        cleaned = "234" + cleaned;
+      }
     }
 
     return "+" + cleaned;

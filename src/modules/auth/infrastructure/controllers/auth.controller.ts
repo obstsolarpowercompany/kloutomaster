@@ -3,12 +3,20 @@ import { Body, Controller, HttpCode, HttpStatus, Post, Req, Request, Res, UseGua
 import { Response } from "express";
 import { skipAuth } from "../../../../helpers/skipAuth";
 import AuthenticationService from "../../application/auth.service";
-import { RegisterUserDocs, ConirmEmailDocs, ResendOTPDocs, LoginUserDocs, RefreshTokenDocs, RegisterByPhone } from "../docs/auth-swagger.doc";
+import {
+  RegisterUserDocs,
+  ResendOTPDocs,
+  LoginUserDocs,
+  RefreshTokenDocs,
+  RegisterByPhone,
+  ConfirmEmailDocs,
+  ConfirmPhoneDocs,
+} from "../docs/auth-swagger.doc";
 import { CreateUserDTO } from "./dto/create-user.dto";
 import { ConfirmOtpDto, ResendOTPDto } from "./dto/confirm-otp.dto";
 import { LoginDto } from "./dto/login.dto";
 import { getRefreshToken } from "../domain/auth";
-import { CreateUserWithPhoneDTO } from "./dto/phone-register-dto";
+import { CreateUserWithPhoneDTO, VerifyPhoneOTPDTO } from "./dto/phone-register-dto";
 
 @ApiTags("Authentication")
 @Controller("auth")
@@ -32,11 +40,19 @@ export default class RegistrationController {
   }
 
   @skipAuth()
-  @ConirmEmailDocs()
+  @ConfirmEmailDocs()
   @Post("verify-email")
   @HttpCode(200)
   async confirmEmailByOtp(@Body() confirmOtpDto: ConfirmOtpDto, @Res({ passthrough: true }) res: Response) {
     return this.authService.confirmEmailByOtp(confirmOtpDto, res);
+  }
+
+  @skipAuth()
+  @ConfirmPhoneDocs()
+  @Post("verify-phone")
+  @HttpCode(200)
+  async confirmPhoneByOtp(@Body() confirmOtpDto: VerifyPhoneOTPDTO, @Res({ passthrough: true }) res: Response) {
+    return this.authService.confirmPhoneByOtp(confirmOtpDto, res);
   }
 
   @skipAuth()
@@ -48,7 +64,7 @@ export default class RegistrationController {
   }
 
   @skipAuth()
-  @ConirmEmailDocs()
+  @ConfirmEmailDocs()
   @Post("verify-login")
   @HttpCode(200)
   async confirmLoginByOtp(@Body() confirmOtpDto: ConfirmOtpDto, @Res({ passthrough: true }) res: Response) {

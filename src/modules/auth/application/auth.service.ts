@@ -19,7 +19,7 @@ import { RefreshToken } from "../../user/domain/entities/refreshToken.entity";
 import { generateAccountNumber } from "../../wallet/application/wallet.helper";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Wallet } from "../../wallet/domain/entities/wallet.entity";
-import { CreateUserWithPhoneDTO } from "../infrastructure/controllers/dto/phone-register-dto";
+import { CreateUserWithPhoneDTO, VerifyPhoneOTPDTO } from "../infrastructure/controllers/dto/phone-register-dto";
 
 @Injectable()
 export default class AuthenticationService {
@@ -122,7 +122,7 @@ export default class AuthenticationService {
       const responsePayload = {
         user: {
           id: newUser.id,
-          email: newUser.email,
+          phone: newUser.phone,
         },
         wallet: {
           id: newWallet.id,
@@ -231,6 +231,22 @@ export default class AuthenticationService {
     });
   }
 
+  async confirmPhoneByOtp(confirmOtpDto: VerifyPhoneOTPDTO, res: any) {
+    return await this.dataSource.transaction(async (manager) => {
+      const updatedUser = await this.userService.verifyOtpPhoneForAction(confirmOtpDto.phone, confirmOtpDto.otp, manager);
+
+      const access_token = await this.generateAccessToken(updatedUser);
+      const refresh_token = await this.generateRefreshToken(updatedUser);
+
+      await this.setAuthCookies(access_token, refresh_token, res);
+
+      return {
+        message: "OTP verified successfully. Sign-up complete.",
+        data: { access_token, refresh_token, ...updatedUser },
+      };
+    });
+  }
+
   async resendOtp(resendOTPDto: ResendOTPDto, res: any) {
     return await this.entityManager.transaction(async (manager) => {
       const email = resendOTPDto.email;
@@ -245,7 +261,7 @@ export default class AuthenticationService {
       }
 
       // Find the last OTP entry for the user
-      const lastOtp = await this.userService.getLastOtpByEmail(email, this.entityManager);
+      const lastOtp = await this.userService.getLastOtpOfUser(email, this.entityManager);
 
       // If there's an existing OTP, delete it
       if (lastOtp) {
