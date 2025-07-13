@@ -1,4 +1,4 @@
-import { ApiTags } from "@nestjs/swagger";
+import { ApiBadRequestResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger";
 import { Body, Controller, HttpCode, HttpStatus, Post, Req, Request, Res, UseGuards, Get, Patch, Query } from "@nestjs/common";
 import { Response } from "express";
 import { skipAuth } from "../../../../helpers/skipAuth";
@@ -18,6 +18,8 @@ import { ConfirmOtpDto, ResendOTPDto } from "./dto/confirm-otp.dto";
 import { LoginDto } from "./dto/login.dto";
 import { getRefreshToken } from "../domain/auth";
 import { CreateUserWithPhoneDTO, ResendPhoneOTPDTO, VerifyPhoneOTPDTO } from "./dto/phone-register-dto";
+import { EnableTwoFactorDto, EnableTwoFactorResponseDto, ErrorResponseDto, TwoFactorResponseDto } from "./dto/two-factor-response.dto";
+import { UsernameLoginDto } from "./dto/username-login.dto";
 
 @ApiTags("Authentication")
 @Controller("auth")
@@ -97,5 +99,48 @@ export default class RegistrationController {
     console.log("Refresh Token:", refreshToken);
 
     return await this.authService.refreshAccessToken(refreshToken, res);
+  }
+
+  @Get("setup-two-factor")
+  @ApiOkResponse({
+    description: "Returns 2FA setup details",
+    type: TwoFactorResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: "Unauthorized - User must be authenticated to setup 2FA",
+    type: ErrorResponseDto,
+  })
+  async setupTwoFactorAuthentication(@Request() req) {
+    return this.authService.setupTwoFactorAuthentication(req.user.id);
+  }
+
+  @ApiOkResponse({
+    description: "Enables two-factor authentication for the user",
+    type: EnableTwoFactorResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: "Unauthorized - User must be authenticated to enable 2FA",
+    type: ErrorResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: "Bad Request - Invalid Verification Code | 2FA is already enabled",
+    type: ErrorResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: "Bad Request - User not found (authenticated user does not exist in the db)",
+    type: ErrorResponseDto,
+  })
+  @Post("enable-two-factor")
+  async enableTwoFactorAuthentication(@Body() enableTwoFaDto: EnableTwoFactorDto, @Request() req) {
+    return this.authService.verifyAndEnableTwoFactor(enableTwoFaDto, req.user.id);
+  }
+
+  @Post("login-with-2fa")
+  @ApiOkResponse({
+    description: "Logs in the user with two-factor authentication",
+    type: TwoFactorResponseDto,
+  })
+  async loginWithTwoFactor(@Body() loginDto: UsernameLoginDto, @Res({ passthrough: true }) res: Response) {
+    return this.authService.loginWithTwoFactor(loginDto, res);
   }
 }

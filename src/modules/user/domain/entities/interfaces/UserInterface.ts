@@ -17,6 +17,8 @@ interface UserInterface {
 
   user_type: string;
 
+  two_factor_enabled: boolean;
+
   is_active: boolean;
 
   is_verified: boolean;

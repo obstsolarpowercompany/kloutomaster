@@ -18,7 +18,7 @@ import * as bcrypt from "bcryptjs";
 import { generateAndSaveOtp, generateAndSavePhoneOtp, validateOtp } from "../../auth/application/otp-utils";
 import { UserProfile } from "../domain/entities/userProfile.entity";
 import { CreateUserWithPhoneDTO } from "@modules/auth/infrastructure/controllers/dto/phone-register-dto";
-import { WhatsAppService } from "@modules/whatsapp/whatsapp.service";
+import { WhatsAppService } from "@modules/auth/application/whatsapp.service";
 
 @Injectable()
 export default class UserService {
@@ -173,12 +173,12 @@ export default class UserService {
     });
     return user;
   }
-  // private async getUserByUsername(username: string) {
-  //   const user: UserResponseDTO = await this.userRepository.findOne({
-  //     where: { username: usernam },
-  //   });
-  //   return user;
-  // }
+  private async getUserByUsername(username: string) {
+    const user: UserResponseDTO = await this.userRepository.findOne({
+      where: { username: username },
+    });
+    return user;
+  }
 
   private async getUserById(identifier: string) {
     const user: UserResponseDTO = await this.userRepository.findOne({
@@ -200,6 +200,14 @@ export default class UserService {
 
   async getUserByEmailTrans(email: string, manager: EntityManager) {
     return await manager.findOne(User, { where: { email } });
+  }
+
+  async getUserByUsernameTrans(username: string, manager: EntityManager) {
+    return await manager.findOne(User, { where: { username } });
+  }
+
+  async getUserByIdTrans(id: string, manager: EntityManager) {
+    return await manager.findOne(User, { where: { id } });
   }
 
   async getUserByPhoneTrans(phone: string, manager: EntityManager) {

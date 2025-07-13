@@ -10,7 +10,7 @@ import { ProfileService } from "./application/profile.service";
 import { UserProfile } from "./domain/entities/userProfile.entity";
 import { MailingService } from "../mailing/application/mailing.service";
 import { RefreshToken } from "./domain/entities/refreshToken.entity";
-import { WhatsAppService } from "@modules/whatsapp/whatsapp.service";
+import { WhatsAppService } from "@modules/auth/application/whatsapp.service";
 
 @Module({
   controllers: [UserController, ProfileController],

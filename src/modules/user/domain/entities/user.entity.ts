@@ -50,6 +50,18 @@ export class User extends AbstractBaseEntity {
   @Column({ nullable: true, default: false })
   is_creator: boolean;
 
+  @Column({ nullable: true })
+  two_factor_secret: string;
+
+  @Column({ type: "boolean", default: false })
+  two_factor_enabled: boolean;
+
+  @Column({ type: "timestamp", nullable: true })
+  two_factor_enabled_at: Date;
+
+  @Column({ type: "json", nullable: true })
+  two_factor_backup_codes: string[];
+
   @OneToOne(() => UserProfile, (userProfile) => userProfile.user)
   profile: UserProfile;
 

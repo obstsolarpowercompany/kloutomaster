@@ -20,7 +20,11 @@ import { generateAccountNumber } from "../../wallet/application/wallet.helper";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Wallet } from "../../wallet/domain/entities/wallet.entity";
 import { CreateUserWithPhoneDTO, ResendPhoneOTPDTO, VerifyPhoneOTPDTO } from "../infrastructure/controllers/dto/phone-register-dto";
-import { WhatsAppService } from "@modules/whatsapp/whatsapp.service";
+import { WhatsAppService } from "@modules/auth/application/whatsapp.service";
+import { TwoFactorService } from "./two-factor.service";
+import { EnableTwoFactorDto, TwoFactorResponseDto } from "../infrastructure/controllers/dto/two-factor-response.dto";
+import { UsernameLoginDto } from "../infrastructure/controllers/dto/username-login.dto";
+import { UserProfileResponseDto } from "@modules/user/infrastructure/dto/profile.dto";
 
 @Injectable()
 export default class AuthenticationService {
@@ -30,6 +34,7 @@ export default class AuthenticationService {
     private configService: ConfigService,
     private dataSource: DataSource,
     private whatsAppService: WhatsAppService,
+    private twoFactorService: TwoFactorService,
     private readonly entityManager: EntityManager,
     @InjectRepository(Wallet) private walletRepo: Repository<Wallet>
   ) {}
@@ -236,7 +241,6 @@ export default class AuthenticationService {
   async confirmPhoneByOtp(confirmOtpDto: VerifyPhoneOTPDTO, res: any) {
     return await this.dataSource.transaction(async (manager) => {
       const phone = this.whatsAppService.formatPhoneNumber(confirmOtpDto.phone);
-      console.log("this is the formatted phone: ", phone);
       const updatedUser = await this.userService.verifyOtpPhoneForAction(phone, confirmOtpDto.otp, manager);
 
       const access_token = await this.generateAccessToken(updatedUser);
@@ -400,5 +404,107 @@ export default class AuthenticationService {
       secure: process.env.NODE_ENV === "production",
       maxAge: this.configService.get<number>("auth.refreshCookieExpiry"),
     });
+  }
+  async setupTwoFactorAuthentication(userId: string): Promise<TwoFactorResponseDto> {
+    var user = await this.userService.getUserRecord({ identifier: userId, identifierType: "id" });
+    if (!user) throw new CustomHttpException("User not found", HttpStatus.NOT_FOUND);
+    if (user.two_factor_enabled) throw new CustomHttpException("Two factor authentication already enabled", HttpStatus.BAD_REQUEST);
+    const userIdentifier = user.email || user.phone || user.username;
+    var twoFactorData = await this.twoFactorService.generateTwoFactorSecret(userIdentifier);
+    return {
+      qrCode: twoFactorData.qrCode,
+      secret: twoFactorData.secret,
+      manualEntryKey: twoFactorData.manualEntryKey,
+    };
+  }
+
+  async verifyAndEnableTwoFactor(
+    twoFaRequest: EnableTwoFactorDto,
+    userId: string
+  ): Promise<{
+    message: string;
+    backupCodes: string[];
+    enabled: boolean;
+  }> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // Get user
+      const { secret, code: totpCode } = twoFaRequest;
+      const user = await this.userService.getUserByIdTrans(userId, queryRunner.manager);
+
+      if (!user) {
+        throw new CustomHttpException("User not found", HttpStatus.NOT_FOUND);
+      }
+
+      if (user.two_factor_enabled) {
+        throw new CustomHttpException("2FA is already enabled for this user", HttpStatus.BAD_REQUEST);
+      }
+
+      console.log("this is the secret: ", secret);
+      console.log("this is the totp code: ", totpCode);
+      // Verify the TOTP code
+      const isValidToken = this.twoFactorService.verifyTwoFactorToken(totpCode, secret);
+
+      if (!isValidToken) {
+        throw new CustomHttpException("Invalid verification code", HttpStatus.BAD_REQUEST);
+      }
+
+      const backupCodes = this.twoFactorService.generateBackupCodes(10);
+      // Hash backup codes for secure storage
+      const hashedBackupCodes = await this.twoFactorService.hashBackupCodes(backupCodes);
+
+      // Enable 2FA and save to database
+      user.two_factor_secret = secret;
+      user.two_factor_enabled = true;
+      user.two_factor_enabled_at = new Date();
+      user.two_factor_backup_codes = hashedBackupCodes;
+
+      await queryRunner.manager.save(user);
+      await queryRunner.commitTransaction();
+
+      return {
+        message: "2FA has been successfully enabled",
+        backupCodes: backupCodes,
+        enabled: true,
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async loginWithTwoFactor(request: UsernameLoginDto, res: Response) {
+    const user = await this.userService.getUserByUsernameTrans(request.username, this.entityManager);
+
+    if (!user) {
+      throw new CustomHttpException(SYS_MSG.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
+    }
+
+    if (!user.two_factor_enabled) {
+      throw new CustomHttpException("you dont have two factor authentication enabled", HttpStatus.BAD_REQUEST);
+    }
+
+    const isValidToken = this.twoFactorService.verifyTwoFactorToken(request.otpCode, user.two_factor_secret);
+
+    if (!isValidToken) {
+      throw new CustomHttpException(SYS_MSG.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
+    }
+
+    const { id, email, phone, username, is_active, is_verified, two_factor_enabled, is_creator } = user;
+
+    const access_token = await this.generateAccessToken(user);
+    const refresh_token = await this.generateRefreshToken(user);
+
+    await this.setAuthCookies(access_token, refresh_token, res);
+
+    return {
+      message: "OTP verified successfully. Sign-up complete.",
+      data: { access_token, refresh_token, id, email, phone, username, is_active, is_verified, two_factor_enabled, is_creator },
+    };
   }
 }

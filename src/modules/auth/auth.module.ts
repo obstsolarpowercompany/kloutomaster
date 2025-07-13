@@ -13,11 +13,12 @@ import { OTP } from "../user/domain/entities/otp.entity";
 import { BullModule } from "@nestjs/bull";
 import { RefreshToken } from "../user/domain/entities/refreshToken.entity";
 import { Wallet } from "../wallet/domain/entities/wallet.entity";
-import { WhatsAppService } from "@modules/whatsapp/whatsapp.service";
+import { WhatsAppService } from "@modules/auth/application/whatsapp.service";
+import { TwoFactorService } from "./application/two-factor.service";
 
 @Module({
   controllers: [RegistrationController],
-  providers: [AuthenticationService, Repository, UserService, MailingService, WhatsAppService],
+  providers: [AuthenticationService, Repository, UserService, MailingService, WhatsAppService, TwoFactorService],
   imports: [
     TypeOrmModule.forFeature([User, OTP, RefreshToken, Wallet]),
     PassportModule.register({ defaultStrategy: "jwt" }),
