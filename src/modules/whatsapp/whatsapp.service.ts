@@ -15,9 +15,8 @@ export class WhatsAppService {
     try {
       // Format phone number (ensure it starts with + and country code)
       const formattedPhone = this.formatPhoneNumber(phoneNumber);
-      console.log("this is the formatted phone number:", formattedPhone);
       const message = await this.client.messages.create({
-        body: `Your verification code is: ${otpCode}. This code will expire in 5 minutes.`,
+        body: `Your Klouto verification code is: ${otpCode}. This code will expire in 5 minutes.`,
         from: this.configService.get("TWILIO_WHATSAPP_NUMBER"),
         to: `whatsapp:${formattedPhone}`,
       });
@@ -37,12 +36,7 @@ export class WhatsAppService {
       cleaned = "234" + cleaned.slice(4);
     } else if (cleaned.startsWith("0")) {
       cleaned = "234" + cleaned.slice(1);
-    } else if (!cleaned.startsWith("234")) {
-      if (cleaned.length === 10) {
-        cleaned = "234" + cleaned;
-      }
     }
-
     return "+" + cleaned;
   }
 }

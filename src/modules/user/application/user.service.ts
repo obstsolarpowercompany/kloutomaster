@@ -331,10 +331,6 @@ export default class UserService {
   async verifyOtpPhoneForAction(phone: string, otp: string, manager: EntityManager): Promise<User> {
     const formattedNumber = this.whatsAppService.formatPhoneNumber(phone);
 
-    if (formattedNumber.length != 14) {
-      throw new CustomHttpException(SYS_MSG.RESOURCE_INVALID("Phone Number"), HttpStatus.BAD_REQUEST);
-    }
-
     const user = await this.getUserByPhoneTrans(formattedNumber, manager);
     if (!user) {
       throw new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.BAD_REQUEST);

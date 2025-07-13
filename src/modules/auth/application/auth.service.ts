@@ -104,7 +104,7 @@ export default class AuthenticationService {
       const userExists = await this.userService.getUserByPhoneTrans(createUserDto.phone, queryRunner.manager);
 
       if (userExists) {
-        throw new CustomHttpException(SYS_MSG.USER_ACCOUNT_EXIST, HttpStatus.BAD_REQUEST);
+        throw new CustomHttpException("An account with the number already exists, sign in", HttpStatus.BAD_REQUEST);
       }
 
       // Save new user within the transaction
@@ -235,7 +235,9 @@ export default class AuthenticationService {
 
   async confirmPhoneByOtp(confirmOtpDto: VerifyPhoneOTPDTO, res: any) {
     return await this.dataSource.transaction(async (manager) => {
-      const updatedUser = await this.userService.verifyOtpPhoneForAction(confirmOtpDto.phone, confirmOtpDto.otp, manager);
+      const phone = this.whatsAppService.formatPhoneNumber(confirmOtpDto.phone);
+      console.log("this is the formatted phone: ", phone);
+      const updatedUser = await this.userService.verifyOtpPhoneForAction(phone, confirmOtpDto.otp, manager);
 
       const access_token = await this.generateAccessToken(updatedUser);
       const refresh_token = await this.generateRefreshToken(updatedUser);
@@ -305,7 +307,7 @@ export default class AuthenticationService {
         await this.userService.deleteValidatedOtp(phone, this.entityManager, "number");
       }
 
-      const { savedOtp, otpCode } = await generateAndSaveOtp(manager.getRepository(OTP), user.email, user.id, "phone");
+      const { savedOtp, otpCode } = await generateAndSaveOtp(manager.getRepository(OTP), user.phone, user.id, "phone");
 
       // Send OTP (e.g., via email or SMS)
       try {
@@ -322,7 +324,7 @@ export default class AuthenticationService {
 
       // Return a success message
       return {
-        message: "OTP has been resent to your whatsapp",
+        message: "OTP has been to your whatsapp",
       };
     });
   }
@@ -348,7 +350,7 @@ export default class AuthenticationService {
 
   // Method to generate access token
   async generateAccessToken(user: User) {
-    const payload = { id: user.id, sub: user.id, email: user.email };
+    const payload = { id: user.id, sub: user.id, email: user.email, phone: user.phone };
     const secret = this.configService.get("auth.jwtSecret");
     const tokenExpiryTime = parseInt(this.configService.get("auth.jwtExpiry"));
     const access_token = await this.jwtService.signAsync(payload, {
@@ -360,7 +362,7 @@ export default class AuthenticationService {
 
   // Method to generate refresh token
   async generateRefreshToken(user: User) {
-    const payload = { id: user.id, sub: user.id, email: user.email };
+    const payload = { id: user.id, sub: user.id, email: user.email, phone: user.phone };
     const secret = this.configService.get("auth.jwtSecret");
     const tokenExpiryTime = parseInt(this.configService.get("auth.refreshTokenExpiryDays"));
     const expiryDate = new Date();

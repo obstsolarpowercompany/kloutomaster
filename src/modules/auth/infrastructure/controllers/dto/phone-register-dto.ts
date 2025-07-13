@@ -4,11 +4,11 @@ import { IsString, IsNotEmpty, Length, Matches } from "class-validator";
 export class CreateUserWithPhoneDTO {
   @ApiProperty({
     description: "The phone number of the user",
-    example: "234567890123",
+    example: "+234567890123",
   })
   @IsString()
   @IsNotEmpty()
-  @Matches(/^\+?[0-9]\d{1,14}$/, {
+  @Matches(/^\+\d+$/, {
     message: "Phone number must be a valid number",
   })
   phone: string;
@@ -17,7 +17,7 @@ export class CreateUserWithPhoneDTO {
 export class VerifyPhoneOTPDTO {
   @ApiProperty({
     description: "The phone number of the user",
-    example: "234567890123",
+    example: "+234567890123",
   })
   @IsString()
   @IsNotEmpty()
@@ -36,7 +36,7 @@ export class VerifyPhoneOTPDTO {
 export class ResendPhoneOTPDTO {
   @ApiProperty({
     description: "The phone number of the user",
-    example: "234567890123",
+    example: "+234567890123",
   })
   @IsString()
   @IsNotEmpty()
