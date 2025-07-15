@@ -4,21 +4,24 @@ import { User } from "./user.entity"; // Assuming you have a User entity
 
 @Entity()
 export class OTP extends AbstractBaseEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
-  @Column()
+  @Column({ nullable: true })
   email: string;
 
-  @Column({ type: 'text' })
+  @Column({ nullable: true })
+  phone: string;
+
+  @Column({ type: "text" })
   otp_code: string;
 
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: "int", default: 0 })
   attempts: number;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: "timestamp", nullable: true })
   expiry: Date;
 
   @ManyToOne(() => User, { eager: true })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: "user_id" })
   user: User;
 }

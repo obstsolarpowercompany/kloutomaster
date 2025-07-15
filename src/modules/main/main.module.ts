@@ -1,31 +1,30 @@
-import { Module, ValidationPipe } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { LoggerModule } from 'nestjs-pino';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
-import authConfig from '../../config/auth.config';
-import serverConfig from '../../config/server.config';
-import dataSource from '../../scripts/data-source';
-import HealthController from './infrastructure/controllers/health.controller';
-import ProbeController from './infrastructure/controllers/probe.controller';
-import { AuthGuard } from '../auth/infrastructure/guards/auth.guard';
-import { AuthModule } from '../auth/auth.module';
-import { MailingModule } from '../mailing/mailing.module';
-import { UserModule } from '../user/user.module';
-import { FollowingModule } from '../following/following.module';
-import { PaymentModule } from '../payment/payment.module';
-import { MaintenanceInterceptor } from './infrastructure/maintenance.interceptor';
-import { configSchema } from '../../config/schemas/config.schema';
-import { WalletModule } from '@modules/wallet/wallet.module';
-import { BankAccountModule } from '@modules/bank-account/bank-account.module';
-
+import { Module, ValidationPipe } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from "@nestjs/core";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { LoggerModule } from "nestjs-pino";
+import { ServeStaticModule } from "@nestjs/serve-static";
+import { join } from "path";
+import authConfig from "../../config/auth.config";
+import serverConfig from "../../config/server.config";
+import dataSource from "../../scripts/data-source";
+import HealthController from "./infrastructure/controllers/health.controller";
+import ProbeController from "./infrastructure/controllers/probe.controller";
+import { AuthGuard } from "../auth/infrastructure/guards/auth.guard";
+import { AuthModule } from "../auth/auth.module";
+import { MailingModule } from "../mailing/mailing.module";
+import { UserModule } from "../user/user.module";
+import { FollowingModule } from "../following/following.module";
+import { PaymentModule } from "../payment/payment.module";
+import { MaintenanceInterceptor } from "./infrastructure/maintenance.interceptor";
+import { configSchema } from "../../config/schemas/config.schema";
+import { WalletModule } from "@modules/wallet/wallet.module";
+import { BankAccountModule } from "@modules/bank-account/bank-account.module";
 
 @Module({
   providers: [
     {
-      provide: 'CONFIG',
+      provide: "CONFIG",
       useClass: ConfigService,
     },
     {
@@ -37,7 +36,7 @@ import { BankAccountModule } from '@modules/bank-account/bank-account.module';
         }),
     },
     {
-      provide: 'APP_GUARD',
+      provide: APP_GUARD,
       useClass: AuthGuard,
     },
     {
@@ -47,7 +46,7 @@ import { BankAccountModule } from '@modules/bank-account/bank-account.module';
   ],
   imports: [
     ConfigModule.forRoot({
-      envFilePath: ['.env.development.local', '.env'],
+      envFilePath: [".env.development.local", ".env"],
       isGlobal: true,
       load: [serverConfig, authConfig],
       validationSchema: configSchema,
@@ -70,8 +69,8 @@ import { BankAccountModule } from '@modules/bank-account/bank-account.module';
     WalletModule,
 
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, 'uploads'),
-      serveRoot: '/uploads',
+      rootPath: join(__dirname, "uploads"),
+      serveRoot: "/uploads",
       serveStaticOptions: {
         index: false,
       },
@@ -79,4 +78,4 @@ import { BankAccountModule } from '@modules/bank-account/bank-account.module';
   ],
   controllers: [HealthController, ProbeController],
 })
-export class AppModule { }
+export class AppModule {}
