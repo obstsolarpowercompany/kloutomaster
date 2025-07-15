@@ -5,10 +5,6 @@ interface UserInterface {
 
   email: string;
 
-  username: string;
-
-  phone: string;
-
   secret: string;
 
   profile: UserProfile;
@@ -17,8 +13,6 @@ interface UserInterface {
 
   user_type: string;
 
-  two_factor_enabled: boolean;
-
   is_active: boolean;
 
   is_verified: boolean;
@@ -26,6 +20,7 @@ interface UserInterface {
   created_at: Date;
 
   updated_at: Date;
+
 }
 
 export default UserInterface;
