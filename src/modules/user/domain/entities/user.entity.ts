@@ -29,14 +29,8 @@ export enum UserType {
 export class User extends AbstractBaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
-  @Column({ unique: true, nullable: true })
+  @Column({ unique: true, nullable: false })
   email: string;
-
-  @Column({ unique: true, nullable: true })
-  phone: string;
-
-  @Column({ unique: true, nullable: true })
-  username: string;
 
   @Column({ unique: false, nullable: true })
   status: string;
@@ -49,18 +43,6 @@ export class User extends AbstractBaseEntity {
 
   @Column({ nullable: true, default: false })
   is_creator: boolean;
-
-  @Column({ nullable: true })
-  two_factor_secret: string;
-
-  @Column({ type: "boolean", default: false })
-  two_factor_enabled: boolean;
-
-  @Column({ type: "timestamp", nullable: true })
-  two_factor_enabled_at: Date;
-
-  @Column({ type: "json", nullable: true })
-  two_factor_backup_codes: string[];
 
   @OneToOne(() => UserProfile, (userProfile) => userProfile.user)
   profile: UserProfile;
