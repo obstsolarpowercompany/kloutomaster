@@ -7,7 +7,7 @@ export class UsernameLoginDto {
     example: "martins",
     type: String,
   })
-  @IsNotEmpty()
+  @IsNotEmpty({ message: "Username is required" })
   username: string;
 
   @ApiProperty({
@@ -15,6 +15,6 @@ export class UsernameLoginDto {
     example: "000000",
     type: String,
   })
-  @IsNotEmpty()
+  @IsNotEmpty({ message: "OTP code is required" })
   otpCode: string;
 }

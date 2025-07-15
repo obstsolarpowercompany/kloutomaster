@@ -16,7 +16,7 @@ const dataSource = new DataSource({
   database: process.env.DB_NAME,
   entities: [`${relativePath}/modules/**/*.entity{.ts,.js}`],
   migrations: [`${relativePath}/../db/migrations/*.ts`],
-  synchronize: true,
+  synchronize: false,
   migrationsTableName: "migrations",
   ssl: sslOption === "require" ? { rejectUnauthorized: false } : sslOption === "true",
 });

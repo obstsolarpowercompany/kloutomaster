@@ -15,6 +15,7 @@ import { RefreshToken } from "../user/domain/entities/refreshToken.entity";
 import { Wallet } from "../wallet/domain/entities/wallet.entity";
 import { WhatsAppService } from "@modules/auth/application/whatsapp.service";
 import { TwoFactorService } from "./application/two-factor.service";
+import { ProfileService } from "@modules/user/application/profile.service";
 
 @Module({
   controllers: [RegistrationController],

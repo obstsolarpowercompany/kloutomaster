@@ -23,7 +23,7 @@
     "prepare": "node_modules/.bin/husky",
     "check-format": "prettier --check .",
     "check-lint": "eslint . --ext ts --ext tsx --ext js",
-    "typeorm": "ts-node ./node_modules/typeorm/cli",
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli",
     "migration:show": "npm run typeorm -- -d ./src/scripts/data-source.ts migration:show",
     "migration:run": "npm run typeorm -- -d ./src/scripts/data-source.ts migration:run --transaction each",
     "migration:generate": "npm run typeorm -- -d ./src/scripts/data-source.ts migration:generate ./db/migrations/%npm_config_name%",

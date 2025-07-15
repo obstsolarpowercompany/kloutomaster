@@ -229,11 +229,13 @@ export default class AuthenticationService {
       const access_token = await this.generateAccessToken(updatedUser);
       const refresh_token = await this.generateRefreshToken(updatedUser);
 
+      // get onboardedstatus
+      const userProfile = await this.userService.getUserProfileById(updatedUser.id);
       await this.setAuthCookies(access_token, refresh_token, res);
 
       return {
         message: "OTP verified successfully. Sign-up complete.",
-        data: { access_token, refresh_token, ...updatedUser },
+        data: { access_token, refresh_token, ...updatedUser, onboarded: userProfile.onboarded },
       };
     });
   }
@@ -246,11 +248,12 @@ export default class AuthenticationService {
       const access_token = await this.generateAccessToken(updatedUser);
       const refresh_token = await this.generateRefreshToken(updatedUser);
 
+      const userProfile = await this.userService.getUserProfileById(updatedUser.id);
       await this.setAuthCookies(access_token, refresh_token, res);
 
       return {
         message: "OTP verified successfully. Sign-up complete.",
-        data: { access_token, refresh_token, ...updatedUser },
+        data: { access_token, refresh_token, ...updatedUser, onboarded: userProfile.onboarded },
       };
     });
   }

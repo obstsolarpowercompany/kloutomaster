@@ -53,6 +53,18 @@ export default class UserService {
 
     return users;
   }
+  async getUserProfileById(userId: string): Promise<UserProfile> {
+    console.log("About to find profile of user");
+    const userProfile = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ["profile"],
+    });
+
+    if (!userProfile?.profile) {
+      throw new CustomHttpException(SYS_MSG.RESOURCE_NOT_FOUND("User Profile"), HttpStatus.NOT_FOUND);
+    }
+    return userProfile.profile;
+  }
 
   async createUser(userData: CreateNewUserOptions, manager: EntityManager): Promise<User> {
     const newUser = new User();
@@ -138,7 +150,6 @@ export default class UserService {
 
     // Generate OTP and save user and OTP within the transaction
     const { savedOtp, otpCode } = await generateAndSaveOtp(manager.getRepository(OTP), user.email, user.id);
-    console.log(user);
     const userProfile = await manager.getRepository(UserProfile).findOne({
       where: { user_id: user.id },
     });

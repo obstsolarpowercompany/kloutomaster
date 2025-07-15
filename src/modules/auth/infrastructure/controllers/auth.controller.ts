@@ -140,6 +140,7 @@ export default class RegistrationController {
     description: "Logs in the user with two-factor authentication",
     type: TwoFactorResponseDto,
   })
+  @skipAuth()
   async loginWithTwoFactor(@Body() loginDto: UsernameLoginDto, @Res({ passthrough: true }) res: Response) {
     return this.authService.loginWithTwoFactor(loginDto, res);
   }
