@@ -1,7 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import * as speakeasy from "speakeasy";
 import * as QRCode from "qrcode";
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 @Injectable()
 export class TwoFactorService {
   private readonly logger = new Logger(TwoFactorService.name);

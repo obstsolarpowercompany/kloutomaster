@@ -7,3 +7,6 @@ docker-compose.yml
 Dockerfile
 #jest.config.ts
 *.md
+npm-debug.log
+.git
+.DS_Store
