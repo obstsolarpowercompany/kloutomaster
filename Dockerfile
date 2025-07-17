@@ -12,6 +12,7 @@ ENV NODE_ENV=production
 WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm ci --production --ignore-scripts && npm cache clean --force
+RUN ls -R /usr/src/build/dist
 COPY --from=builder /usr/src/build/dist ./dist
 RUN chown -R node:node /usr/src/app
 USER node
