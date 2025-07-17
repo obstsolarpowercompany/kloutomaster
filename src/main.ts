@@ -40,14 +40,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup("api/docs", app, document);
 
-  // let port =
-  //   app.get<ConfigService>(ConfigService).get<number>('server.port') || 3000;
+  let port = app.get<ConfigService>(ConfigService).get<number>("server.port") || 3000;
 
-  // port = await findAvailablePort(port);
-
-  let port = process.env.PORT
-    ? parseInt(process.env.PORT, 10) // Railway-provided port
-    : app.get<ConfigService>(ConfigService).get<number>("server.port") || 3008;
+  port = await findAvailablePort(port);
   await app.listen(port, () => {
     Log4jsLogger.log(`Application listening on port ${port}`);
   });
