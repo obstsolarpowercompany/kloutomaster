@@ -1,9 +1,9 @@
 import { AbstractBaseEntity } from "../../../shared/infrastructure/domain/base.entity";
-import { Column, Entity, ManyToOne, JoinColumn, PrimaryGeneratedColumn, CreateDateColumn } from "typeorm";
+import { Column, Entity, ManyToOne, JoinColumn, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { User } from "./user.entity"; // Assuming you have a User entity
 
 @Entity()
-export class OTP extends AbstractBaseEntity {
+export class OTP {
   @PrimaryGeneratedColumn("uuid")
   id: string;
   @Column({ nullable: true })
@@ -24,4 +24,10 @@ export class OTP extends AbstractBaseEntity {
   @ManyToOne(() => User, { eager: true })
   @JoinColumn({ name: "user_id" })
   user: User;
+
+  @CreateDateColumn({ type: "timestamp without time zone" })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: "timestamp without time zone" })
+  updated_at: Date;
 }

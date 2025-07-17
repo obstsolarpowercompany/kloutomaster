@@ -16,8 +16,8 @@ export const mockUser: User = {
   profile: {} as UserProfile,
   followers: [],
   following: [],
-  createdAt: new Date(),
-  updatedAt: new Date(),
+  // createdAt: new Date(),
+  // updatedAt: new Date(),
   two_factor_backup_codes: [],
   two_factor_enabled_at: new Date(),
   two_factor_enabled: false,
@@ -26,4 +26,7 @@ export const mockUser: User = {
   refreshTokens: [],
   wallet: new Wallet(),
   bankAccounts: [new BankAccountEntity()],
+  created_at: new Date(),
+  updated_at: new Date(),
+  deletedAt: null,
 };

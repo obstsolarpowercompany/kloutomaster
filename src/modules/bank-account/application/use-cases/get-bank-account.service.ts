@@ -6,10 +6,9 @@ export class GetBankAccountService {
   constructor(
     @Inject(BANK_ACCOUNT)
     private readonly bankAccountRepository: IBankAccountRepository
-  ) {
-  }
+  ) {}
 
   async process(id: string) {
-    return this.bankAccountRepository.getBankAccountById(+id);
+    return this.bankAccountRepository.getBankAccountById(id);
   }
 }

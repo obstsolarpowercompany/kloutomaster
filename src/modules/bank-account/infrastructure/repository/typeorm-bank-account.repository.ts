@@ -15,12 +15,10 @@ export class TypeOrmBankAccountRepository implements IBankAccountRepository {
     @InjectRepository(BankAccountEntity)
     private readonly bankAccountRepository: Repository<BankAccountEntity>,
     @Inject(PAYSTACK)
-    private readonly paystackService: PayStackService,
+    private readonly paystackService: PayStackService
   ) {}
 
-  async findAll(
-    command: ListBankAccountsCommand
-  ): Promise<BankAccountEntity[]> {
+  async findAll(command: ListBankAccountsCommand): Promise<BankAccountEntity[]> {
     const { userId, page = 1, perPage = 10 } = command;
 
     return await this.bankAccountRepository.find({
@@ -30,7 +28,7 @@ export class TypeOrmBankAccountRepository implements IBankAccountRepository {
     });
   }
 
-  async getBankAccountById(id: number): Promise<BankAccountEntity> {
+  async getBankAccountById(id: string): Promise<BankAccountEntity> {
     return await this.bankAccountRepository.findOne({
       where: { id },
     });
@@ -38,7 +36,7 @@ export class TypeOrmBankAccountRepository implements IBankAccountRepository {
 
   async delete(command: DeleteBankAccountCommand) {
     return this.bankAccountRepository.delete({
-      id: +command.bankAccountId,
+      id: command.bankAccountId,
       user: {
         id: command.userId,
       },
@@ -53,12 +51,12 @@ export class TypeOrmBankAccountRepository implements IBankAccountRepository {
     });
 
     if (!accountDetails) {
-      throw new Error('Invalid account details');
+      throw new Error("Invalid account details");
     }
 
     return await this.bankAccountRepository.save({
       is_verified: true,
-      account_holder_name: accountDetails.data['account_name'],
+      account_holder_name: accountDetails.data["account_name"],
       account_number: command.accountNumber,
       bank_name: command.bankName,
       bank_code: command.bankCode,
@@ -75,24 +73,26 @@ export class TypeOrmBankAccountRepository implements IBankAccountRepository {
     });
 
     if (!accountDetails) {
-      throw new Error('Invalid account details');
+      throw new Error("Invalid account details");
     }
-    if (command?.accountHolderName && !command.passThrough && 
-      (command.accountHolderName.toLowerCase() !== accountDetails.data['account_name'].toLowerCase())) {
-      throw new Error('Account name mismatch')
+    if (
+      command?.accountHolderName &&
+      !command.passThrough &&
+      command.accountHolderName.toLowerCase() !== accountDetails.data["account_name"].toLowerCase()
+    ) {
+      throw new Error("Account name mismatch");
     }
     return await this.bankAccountRepository.save({
-      id: +command.bankAccountId,
+      id: command.bankAccountId,
       user: {
         id: command.userId,
       },
       bank_name: command.bankName,
       bank_code: command.bankCode,
       account_number: command.accountNumber,
-      account_holder_name: accountDetails.data['account_name'],
+      account_holder_name: accountDetails.data["account_name"],
       is_verified: true,
       is_default: command.isDefault,
     });
   }
 }
-

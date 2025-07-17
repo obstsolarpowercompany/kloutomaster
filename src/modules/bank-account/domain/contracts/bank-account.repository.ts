@@ -5,9 +5,9 @@ import { DeleteBankAccountCommand } from "@modules/bank-account/application/use-
 import { UpdateBankAccountCommand } from "@modules/bank-account/application/use-cases/update-bank-account.command";
 
 export interface IBankAccountRepository {
-    findAll(command: ListBankAccountsCommand): Promise<BankAccountEntity[]>;
-    getBankAccountById(id: number): Promise<BankAccountEntity>;
-    create(command: CreateBankAccountCommand): Promise<BankAccountEntity>;
-    delete(command: DeleteBankAccountCommand): void;
-    update(command: UpdateBankAccountCommand): Promise<BankAccountEntity>;
+  findAll(command: ListBankAccountsCommand): Promise<BankAccountEntity[]>;
+  getBankAccountById(id: string): Promise<BankAccountEntity>;
+  create(command: CreateBankAccountCommand): Promise<BankAccountEntity>;
+  delete(command: DeleteBankAccountCommand): void;
+  update(command: UpdateBankAccountCommand): Promise<BankAccountEntity>;
 }
