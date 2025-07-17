@@ -11,7 +11,6 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from "typeorm";
 import { AbstractBaseEntity } from "../../../shared/infrastructure/domain/base.entity";
 import { UserProfile } from "./userProfile.entity";
@@ -27,72 +26,50 @@ export enum UserType {
 }
 
 @Entity({ name: "users" })
-export class User {
+export class User extends AbstractBaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
-
-  @CreateDateColumn({ type: "timestamp without time zone" })
-  created_at: Date;
-
-  @UpdateDateColumn({ type: "timestamp without time zone" })
-  updated_at: Date;
-
-  @Column({
-    type: "varchar",
-    unique: true,
-    nullable: true,
-  })
+  @Column({ unique: true, nullable: true })
   email: string;
 
-  @Column({
-    type: "varchar",
-    nullable: true,
-  })
+  @Column({ unique: true, nullable: true })
+  phone: string;
+
+  @Column({ unique: true, nullable: true })
+  username: string;
+
+  @Column({ unique: false, nullable: true })
   status: string;
 
-  @Column({
-    type: "boolean",
-    nullable: true,
-    default: true,
-  })
+  @Column({ nullable: true, default: true })
   is_active: boolean;
 
-  @DeleteDateColumn({
-    type: "timestamp without time zone",
-    nullable: true,
-  })
-  deletedAt: Date;
-
-  @Column({
-    type: "varchar",
-    nullable: true,
-    default: "user",
-  })
-  user_type: string;
-
-  @Column({
-    type: "boolean",
-    nullable: true,
-    default: false,
-  })
+  @Column({ nullable: true, default: false })
   is_verified: boolean;
 
-  @Column({
-    type: "boolean",
-    nullable: true,
-    default: false,
-  })
+  @Column({ nullable: true, default: false })
   is_creator: boolean;
 
-  @Column("text", {
-    array: true,
-    nullable: true,
-  })
-  interests: string[];
+  @Column({ nullable: true })
+  two_factor_secret: string;
 
-  // Relationships (keep these as they are)
+  @Column({ type: "boolean", default: false })
+  two_factor_enabled: boolean;
+
+  @Column({ type: "timestamp", nullable: true })
+  two_factor_enabled_at: Date;
+
+  @Column({ type: "json", nullable: true })
+  two_factor_backup_codes: string[];
+
   @OneToOne(() => UserProfile, (userProfile) => userProfile.user)
   profile: UserProfile;
+
+  @DeleteDateColumn({ nullable: true })
+  deletedAt?: Date;
+
+  @Column({ nullable: true, default: UserType.USER })
+  user_type: string;
 
   @OneToOne(() => Wallet, (wallet) => wallet.user)
   wallet: Wallet;
@@ -106,24 +83,9 @@ export class User {
   @OneToMany(() => Follower, (follower) => follower.followee)
   following: Follower[];
 
+  @Column("text", { array: true, nullable: true })
+  interests: string[];
+
   @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshTokens: RefreshToken[];
-
-  @Column({ unique: true, nullable: true })
-  phone: string;
-
-  @Column({ unique: true, nullable: true })
-  username: string;
-
-  @Column({ nullable: true })
-  two_factor_secret: string;
-
-  @Column({ type: "boolean", default: false })
-  two_factor_enabled: boolean;
-
-  @Column({ type: "timestamp", nullable: true })
-  two_factor_enabled_at: Date;
-
-  @Column({ type: "json", nullable: true })
-  two_factor_backup_codes: string[];
 }

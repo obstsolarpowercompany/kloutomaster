@@ -167,8 +167,8 @@ export default class UserService {
     return user;
   }
 
-  async saveOtpByEmail(email: string, otp_code: string): Promise<void> {
-    await this.otpRepository.save({ email, otp_code, created_at: new Date() });
+  async saveOtpByEmail(email: string, otp: string): Promise<void> {
+    await this.otpRepository.save({ email, otp, createdAt: new Date() });
   }
 
   async updateUserRecord(userUpdateOptions: UpdateUserRecordOption) {
@@ -301,12 +301,12 @@ export default class UserService {
     if (method === "number") {
       return await otpRepo.findOne({
         where: { phone: identifier },
-        order: { created_at: "DESC" },
+        order: { createdAt: "DESC" },
       });
     }
     return await otpRepo.findOne({
       where: { email: identifier },
-      order: { created_at: "DESC" },
+      order: { createdAt: "DESC" },
     });
   }
 
